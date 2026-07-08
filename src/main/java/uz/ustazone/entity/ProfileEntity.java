@@ -62,7 +62,7 @@ public class ProfileEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
-    private GeneralStatusEnum status = GeneralStatusEnum.ACTIVE;
+    private GeneralStatusEnum status;
 
     @Column(name = "avatar_attach_id")
     private String avatarAttachId;
