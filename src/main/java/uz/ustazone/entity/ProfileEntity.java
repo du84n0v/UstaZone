@@ -8,7 +8,6 @@ import uz.ustazone.enums.GeneralStatusEnum;
 import uz.ustazone.enums.ProfileRoleEnum;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 @Getter
 @Setter

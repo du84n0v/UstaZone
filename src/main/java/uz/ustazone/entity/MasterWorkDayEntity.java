@@ -5,7 +5,6 @@ import lombok.Getter;
 import lombok.Setter;
 import uz.ustazone.enums.WeekDayEnum;
 
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 @Getter
