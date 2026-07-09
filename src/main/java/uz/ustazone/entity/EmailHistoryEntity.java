@@ -29,9 +29,8 @@ public class EmailHistoryEntity {
     @Column(name = "message", columnDefinition = "text", nullable = false)
     private String message;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false)
-    private NotificationStatusEnum status; // SENT, FAILED
+    @Column(name = "code", nullable = false)
+    private String code;
 
     @CreationTimestamp
     @Column(name = "created_date", updatable = false)

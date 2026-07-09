@@ -22,7 +22,7 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(@NonNull String username) throws UsernameNotFoundException {
         System.out.println("loadUsername: " + username);
-        Optional<ProfileEntity> optional = profileRepository.findByEmailAndStatusAndVisibleTrue(username, GeneralStatusEnum.ACTIVE, true);
+        Optional<ProfileEntity> optional = profileRepository.findByEmailAndVisibleTrue(username, true);
         if(optional.isEmpty()){
             throw new ItemNotFoundException("User not found");
         }

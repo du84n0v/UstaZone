@@ -23,7 +23,7 @@ public class AttachEntity {
     private String originName;
 
     @Column(name = "size")
-    private Integer size;
+    private Long size;
 
     @Column(name = "type")
     private String type;

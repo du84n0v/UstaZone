@@ -42,7 +42,7 @@ public class CustomUserDetails  implements UserDetails {
 
     @Override
     public boolean isAccountNonLocked() {
-        return status != GeneralStatusEnum.ACTIVE;
+        return status == GeneralStatusEnum.ACTIVE;
     }
 
     @Override
