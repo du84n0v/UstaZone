@@ -20,7 +20,6 @@ import java.util.List;
 public class MasterProfileEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "profile_id")
     private String id;
     @OneToOne(fetch = FetchType.LAZY)

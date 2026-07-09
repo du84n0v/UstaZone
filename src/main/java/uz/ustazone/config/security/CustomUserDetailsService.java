@@ -1,7 +1,6 @@
 package uz.ustazone.config.security;
 
 import org.jspecify.annotations.NonNull;
-import uz.ustazone.enums.GeneralStatusEnum;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -22,7 +21,7 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(@NonNull String username) throws UsernameNotFoundException {
         System.out.println("loadUsername: " + username);
-        Optional<ProfileEntity> optional = profileRepository.findByEmailAndStatusAndVisibleTrue(username, GeneralStatusEnum.ACTIVE, true);
+        Optional<ProfileEntity> optional = profileRepository.findByEmailAndVisibleTrue(username, true);
         if(optional.isEmpty()){
             throw new ItemNotFoundException("User not found");
         }

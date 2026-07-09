@@ -1,0 +1,36 @@
+###register
+POST localhost:8080/api/v1/auth/register/client
+Content-Type: application/json
+
+{
+  "fullName": "Sadriddin Dusanov",
+  "phone": "+998999999999",
+  "email": "oqmol24@gmail.com",
+  "password": "12345"
+}
+
+###Verify
+POST localhost:8080/api/v1/auth/verify
+Content-Type: application/json
+
+{
+  "email": "oqmol24@gmail.com",
+  "code": "256839"
+}
+
+###resend
+POST localhost:8080/api/v1/auth/resend-code
+Content-Type: application/json
+
+{
+  "email": "oqmol24@gmail.com"
+}
+
+###login
+POST localhost:8080/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "email": "oqmol24@gmail.com",
+  "password": "12345"
+}
