@@ -3,7 +3,6 @@ package uz.ustazone.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
-import uz.ustazone.enums.NotificationStatusEnum;
 
 import java.time.LocalDateTime;
 

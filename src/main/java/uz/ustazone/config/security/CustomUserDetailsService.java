@@ -1,7 +1,6 @@
 package uz.ustazone.config.security;
 
 import org.jspecify.annotations.NonNull;
-import uz.ustazone.enums.GeneralStatusEnum;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
