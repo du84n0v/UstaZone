@@ -4,6 +4,7 @@ import lombok.*;
 import uz.ustazone.enums.GeneralStatusEnum;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Getter
 @Setter
@@ -27,4 +28,6 @@ public class MasterCabinetResponseDTO {
 
     private Long completedOrdersCount;   // Tamomlagan ishlari soni (status = COMPLETED)
     private Long inProgressOrdersCount;  // Jarayondagi ishlari soni (ACCEPTED, ENROUTE, IN_PROGRESS)
+
+    private List<MasterServicePriceDTO> servicePrices;
 }

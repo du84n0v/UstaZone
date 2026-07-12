@@ -10,8 +10,12 @@ import uz.ustazone.dto.profile.EmailVerifyRequestDTO;
 import uz.ustazone.dto.profile.PasswordUpdateDTO;
 import uz.ustazone.dto.profile.master.MasterCabinetResponseDTO;
 import uz.ustazone.dto.profile.master.MasterProfileUpdateDTO;
+import uz.ustazone.dto.profile.master.MasterScheduleUpdateDTO;
+import uz.ustazone.dto.profile.master.MasterServicePriceUpdateDTO;
 import uz.ustazone.service.MasterProfileService;
 import uz.ustazone.util.SpringSecurityUtil;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/master")
@@ -51,5 +55,17 @@ public class MasterController {
     public ResponseEntity<String> verifyChangeEmail(@Valid @RequestBody EmailVerifyRequestDTO dto) {
         String masterId = SpringSecurityUtil.getCurrentProfileId();
         return ResponseEntity.ok(masterService.verifyAndChangeEmail(masterId, dto));
+    }
+
+    @PutMapping("/services/prices")
+    public ResponseEntity<String> updateServicePrices(@RequestBody List<MasterServicePriceUpdateDTO> dtoList) {
+        String masterId = SpringSecurityUtil.getCurrentProfileId();
+        return ResponseEntity.ok(masterService.updatePrices(masterId, dtoList));
+    }
+
+    @PutMapping("/schedule")
+    public ResponseEntity<String> updateSchedule(@RequestBody MasterScheduleUpdateDTO dto) {
+        String masterId = SpringSecurityUtil.getCurrentProfileId();
+        return ResponseEntity.ok(masterService.updateSchedule(masterId, dto));
     }
 }

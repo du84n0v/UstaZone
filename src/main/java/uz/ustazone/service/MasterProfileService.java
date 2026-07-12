@@ -1,31 +1,27 @@
 package uz.ustazone.service;
 
 import jakarta.transaction.Transactional;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import uz.ustazone.dto.auth.MasterRegisterDTO;
-import uz.ustazone.dto.auth.VerificationDTO;
 import uz.ustazone.dto.profile.EmailVerifyRequestDTO;
 import uz.ustazone.dto.profile.PasswordUpdateDTO;
-import uz.ustazone.dto.profile.master.LocationDTO;
-import uz.ustazone.dto.profile.master.MasterCabinetResponseDTO;
-import uz.ustazone.dto.profile.master.MasterProfileUpdateDTO;
-import uz.ustazone.dto.profile.master.ProfessionalDTO;
-import uz.ustazone.entity.MasterProfileEntity;
-import uz.ustazone.entity.ProfileEntity;
+import uz.ustazone.dto.profile.master.*;
+import uz.ustazone.entity.*;
 import uz.ustazone.enums.OrderStatusEnum;
+import uz.ustazone.enums.PriceTypeEnum;
 import uz.ustazone.exception.AppBadRequestException;
 import uz.ustazone.exception.ItemNotFoundException;
 import uz.ustazone.repository.MasterProfileRepository;
+import uz.ustazone.repository.MasterWorkDayRepository;
 import uz.ustazone.repository.OrderRepository;
 import uz.ustazone.repository.ProfileRepository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class MasterProfileService {
@@ -50,6 +46,8 @@ public class MasterProfileService {
     private MailSenderService senderService;
     @Autowired
     private VerificationService verificationService;
+    @Autowired
+    private MasterWorkDayRepository masterWorkDayRepository;
 
     public void save(
             String profileId,
@@ -95,7 +93,11 @@ public class MasterProfileService {
         MasterProfileEntity masterProfile = masterProfileRepository.findById(masterId)
                 .orElseThrow(() -> new ItemNotFoundException("Usta topilmadi"));
 
-        ProfileEntity profile = profileRepository.findById(masterId).get();
+        Optional<ProfileEntity> optional = profileRepository.findById(masterId);
+        if (optional.isEmpty()) {
+            throw new ItemNotFoundException("Profile not found");
+        }
+        ProfileEntity profile = optional.get();
 
         // 2. Jarayondagi statuslar ro'yxati
         List<OrderStatusEnum> inProgressStatuses = List.of(
@@ -120,10 +122,25 @@ public class MasterProfileService {
                 masterProfile.getBio(), // yoki profile.getAboutMe()
                 masterProfile.getMasterCategories().stream()
                         .map(pc -> pc.getCategory().getNameUz())
-                        .toList()// agar tasmali skillar jadvali bo'lsa o'sha yerdan list olinadi
+                        .toList()
         );
 
+        //avatar url
         String avaUrl = profile.getAvatarAttachId() != null ? attachService.openURL(profile.getAvatarAttachId()) : null;
+
+        //category prices
+        List<MasterCategoryEntity> masterServices = masterCategoryService.getMasterCategories(masterId);
+
+        List<MasterServicePriceDTO> servicePriceDTOs = masterServices.stream().map(ms ->
+                MasterServicePriceDTO.builder()
+                        .id(ms.getId()) // MasterCategoryEntity ID-si
+                        .subCategoryId(ms.getCategoryId())
+                        .subCategoryName(ms.getCategory().getNameUz()) // yoki tilga qarab nameUz, nameRu
+                        .priceType(ms.getPriceType())
+                        .minPrice(ms.getMinPrice())
+                        .maxPrice(ms.getMaxPrice())
+                        .build()
+        ).toList();
 
         // 5. Hammasini bitta DTO'ga joylab qaytaramiz
         return MasterCabinetResponseDTO.builder()
@@ -140,6 +157,7 @@ public class MasterProfileService {
                 .profInfo(profInfo)
                 .completedOrdersCount(completedCount)
                 .inProgressOrdersCount(inProgressCount)
+                .servicePrices(servicePriceDTOs)
                 .build();
     }
 
@@ -200,5 +218,43 @@ public class MasterProfileService {
         profileRepository.save(master);
 
         return "Email muvafaqiyatli ozgartirildi";
+    }
+
+    public String updatePrices(String masterId, List<MasterServicePriceUpdateDTO> dtoList) {
+        ProfileEntity  profile = profileRepository.getById(masterId)
+                        .orElseThrow(() -> new ItemNotFoundException("Profile not found"));
+
+        masterCategoryService.updateCategoryPrice(dtoList);
+
+        return "Successfully changed";
+    }
+
+    @Transactional
+    public String updateSchedule(String masterId, MasterScheduleUpdateDTO dto) {
+        masterWorkDayRepository.deleteAllByMasterProfileId(masterId);
+
+        if (dto.getDays() == null || dto.getDays().isEmpty()) {
+            return "Successfully updated";
+        }
+
+        // 3. Faqat toggle switch yoqilgan (isActive == true) kunlarni Entity-ga o'giramiz
+        List<MasterWorkDayEntity> newSchedule = dto.getDays().stream()
+                .filter(MasterWorkDayDTO::getIsActive) // Faqat aktiv kunlarni saqlaymiz
+                .map(dayDto -> {
+                    MasterWorkDayEntity entity = new MasterWorkDayEntity();
+                    entity.setMasterProfileId(masterId);
+                    entity.setDayOfWeek(dayDto.getDayOfWeek());
+                    entity.setWorkStart(dayDto.getWorkStart());
+                    entity.setWorkEnd(dayDto.getWorkEnd());
+                    return entity;
+                })
+                .toList();
+
+        // 4. Yangi jadvalni bittada saqlaymiz
+        if (!newSchedule.isEmpty()) {
+            masterWorkDayRepository.saveAll(newSchedule);
+        }
+
+        return "Successfully updated";
     }
 }
