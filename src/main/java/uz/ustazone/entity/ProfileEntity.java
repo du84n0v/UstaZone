@@ -7,6 +7,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import uz.ustazone.enums.GeneralStatusEnum;
 import uz.ustazone.enums.ProfileRoleEnum;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Getter
@@ -58,7 +59,7 @@ public class ProfileEntity {
     private Boolean isBlocked = false;
 
     @Column(name = "bonus_balance")
-    private Double bonusBalance = 0.0;
+    private BigDecimal bonusBalance = BigDecimal.ZERO;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
