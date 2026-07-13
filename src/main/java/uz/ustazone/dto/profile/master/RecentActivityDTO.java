@@ -1,4 +1,4 @@
-package uz.ustazone.dto.profile.dashboard;
+package uz.ustazone.dto.profile.master;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

@@ -4,8 +4,8 @@ Content-Type: application/json
 
 {
   "fullName": "Sadriddin Dusanov",
-  "phone": "+998999999999",
-  "email": "oqmol24@gmail.com",
+  "phone": "+998999999998",
+  "email": "dus4n0v@gmail.com",
   "password": "12345"
 }
 
@@ -14,8 +14,8 @@ POST localhost:8080/api/v1/auth/verify
 Content-Type: application/json
 
 {
-  "email": "oqmol24@gmail.com",
-  "code": "256839"
+  "email": "dus4n0v@gmail.com",
+  "code": "111949"
 }
 
 ###resend
@@ -31,6 +31,6 @@ POST localhost:8080/api/v1/auth/login
 Content-Type: application/json
 
 {
-  "email": "oqmol24@gmail.com",
+  "email": "dus4n0v@gmail.com",
   "password": "12345"
 }

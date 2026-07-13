@@ -45,11 +45,9 @@ public class AuthService {
     @Autowired
     private MailSenderService mailSenderService;
     @Autowired
-    private VerificationAttemptService attemptService;
+    private VerificationService verificationService;
     @Autowired
     private VerificationAttemptRepository attemptRepository;
-    @Autowired
-    private EmailHistoryService emailHistoryService;
     @Autowired
     private AuthenticationManager authenticationManager;
 
@@ -133,46 +131,13 @@ public class AuthService {
 
     @Transactional
     public String verify(VerificationDTO dto) {
-        LocalDateTime now = LocalDateTime.now();
-        VerificationAttemptEntity attempt = attemptRepository.findByEmail(dto.getEmail());
-
-        if (attempt != null && attempt.getAttemptCount() >= 3 && attempt.getLastAttempt() != null) {
-            LocalDateTime expiryTime = attempt.getLastAttempt().plusMinutes(2);
-            if (expiryTime.isAfter(now)) {
-                throw new AppBadRequestException("Too many attempts. Please wait 2 minutes");
-            } else {
-                attemptService.resetAttemptCount(attempt);
-            }
-        }
-
-        EmailHistoryEntity lastCode = emailHistoryService.findTopByToEmailOrderByCreatedDateDesc(dto.getEmail());
-        if (lastCode == null) {
-            throw new AppBadRequestException("No code found for this email. Please click resend");
-        }
-
-        boolean isExpired = lastCode.getCreatedDate().plusMinutes(5).isBefore(now);
-        boolean isWrongCode = !lastCode.getCode().equals(dto.getCode());
-
-        if (isExpired || isWrongCode) {
-            attempt = attemptService.incrementAttempt(dto.getEmail(), attempt);
-            int remaining = 3 - attempt.getAttemptCount();
-
-            if (isExpired) {
-                throw new AppBadRequestException("Code is expired. Please click resend to get a new code");
-            }
-
-            throw new AppBadRequestException("Wrong code: " + (remaining > 0 ? remaining + "-attempt left" : "Please try 2 minutes later"));
-        }
+        verificationService.checkVerificationCode(dto.getEmail(), dto.getCode());
 
         ProfileEntity profile = profileRepository.findByEmail(dto.getEmail())
                 .orElseThrow(() -> new ItemNotFoundException("User not found"));
 
         profile.setStatus(GeneralStatusEnum.ACTIVE);
         profileRepository.save(profile);
-
-        if (attempt != null) {
-            attemptRepository.delete(attempt);
-        }
 
         return "Successfully activated. You can login by now";
     }

@@ -1,8 +1,12 @@
 package uz.ustazone.service;
 
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import uz.ustazone.dto.profile.master.MasterServicePriceUpdateDTO;
 import uz.ustazone.entity.MasterCategoryEntity;
+import uz.ustazone.enums.PriceTypeEnum;
+import uz.ustazone.exception.AppBadRequestException;
 import uz.ustazone.repository.MasterCategoryRepository;
 
 import java.util.ArrayList;
@@ -30,5 +34,25 @@ public class MasterCategoryService {
 
     public void deleteCategoryByProfileId(String profileId){
         masterCategoryRepository.deleteByMasterProfileId(profileId);
+    }
+
+    public List<MasterCategoryEntity> getMasterCategories(String masterId) {
+        return masterCategoryRepository.findAllByMasterProfileIdAndCategoryParentIsNotNull(masterId);
+    }
+
+    @Transactional
+    public void updateCategoryPrice(List<MasterServicePriceUpdateDTO> dtoList) {
+        for (MasterServicePriceUpdateDTO dto : dtoList) {
+            int effRow = 0;
+            if(dto.getPriceType().equals(PriceTypeEnum.FROM)) {
+                effRow = masterCategoryRepository.updateCategoryPrice(dto.getId(), dto.getPriceType(), dto.getMinPrice(), dto.getMaxPrice());
+            }
+            else {
+                effRow = masterCategoryRepository.updateCategoryPrice(dto.getId(), dto.getPriceType(), dto.getMinPrice(), null);
+            }
+            if(effRow == 0){
+                throw new AppBadRequestException("Something went wrong");
+            }
+        }
     }
 }
