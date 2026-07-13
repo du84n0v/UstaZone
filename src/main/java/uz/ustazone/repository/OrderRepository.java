@@ -16,4 +16,10 @@ public interface OrderRepository extends CrudRepository<OrderEntity, Long> {
     Long countByMasterIdAndStatusIn(String masterId, Collection<OrderStatusEnum> statuses);
 
     Long countByMasterIdAndStatus(String masterId, OrderStatusEnum status); // COMPLETED status bilan chaqiriladi
+
+    Long countByClientId(String clientId);
+
+    Long countByClientIdAndStatusIn(String clientId, List<OrderStatusEnum> activeStatuses);
+
+    List<OrderEntity> findAllByClientIdAndStatusInOrderByCreatedDateDesc(String clientId, List<OrderStatusEnum> activeStatuses);
 }

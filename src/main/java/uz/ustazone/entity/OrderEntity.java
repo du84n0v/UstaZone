@@ -9,6 +9,8 @@ import uz.ustazone.enums.PaymentMethodEnum;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -38,11 +40,9 @@ public class OrderEntity {
     private ProfileEntity master;
 
     // --- CATEGORY BOG'LANISHI ---
-    @Column(name = "category_id", nullable = false)
-    private String categoryId;
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "category_id", insertable = false, updatable = false)
-    private CategoryEntity category;
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<OrderCategoryEntity> categories = new ArrayList<>();
 
     // --- PROMO CODE BOG'LANISHI ---
     @Column(name = "promo_code_id")
