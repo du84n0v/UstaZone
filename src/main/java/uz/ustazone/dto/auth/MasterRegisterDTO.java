@@ -1,10 +1,9 @@
 package uz.ustazone.dto.auth;
 
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.*;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.multipart.MultipartFile;
 import uz.ustazone.enums.WeekDayEnum;
 import java.time.LocalTime;
 import java.util.List;
@@ -36,12 +35,12 @@ public class MasterRegisterDTO {
     @NotNull
     private Integer serviceRadiusKm; // Slayderdagi kilometr (Masalan: 20)
 
-    @NotBlank
+    @NotNull
     private Double latitude;        // Masalan: 41.311081 (Toshkent koordinatasi)
-    @NotBlank
+    @NotNull
     private Double longitude;
 
-    @NotBlank
+    @Positive
     private Integer experienceYear; // Masalan: "1-3 yil", "3-5 yil" (yoki Enum qilsang ham bo'ladi)
 
     private List<WeekDayEnum> workDays;      // Masalan: [MONDAY, TUESDAY, WEDNESDAY...]
@@ -53,4 +52,10 @@ public class MasterRegisterDTO {
     private String bankAccountNumber; // Bank hisob raqami (2020...) [Ixtiyoriy]
 
     private String bio; // O'zingiz haqingizda matn
+
+    //##files
+    private String passportId;
+    private String selfieId;
+    private List<String> certificateIds;
+    private String profilePicId;
 }

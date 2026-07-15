@@ -51,21 +51,17 @@ public class AuthService {
     @Autowired
     private AuthenticationManager authenticationManager;
 
-    public String registerMaster(MasterRegisterDTO dto,
-                                 MultipartFile passportImg,
-                                 MultipartFile selfieImg,
-                                 List<MultipartFile> certificates,
-                                 MultipartFile profileImg) {
+    public String registerMaster(MasterRegisterDTO dto) {
 
         userExists(dto.getEmail(), dto.getPhone());
 
         ProfileEntity profile = dtoToEntity(dto);
 
-        if (!profileImg.isEmpty()) profile.setAvatarAttachId(attachService.upload(profileImg));
+        if (dto.getProfilePicId() != null) profile.setAvatarAttachId(dto.getProfilePicId());
 
         profileRepository.save(profile);
 
-        masterProfileService.save(profile.getId(), dto, passportImg, selfieImg, certificates);
+        masterProfileService.save(profile.getId(), dto);
 
         sendCode(dto.getEmail());
 
@@ -163,7 +159,7 @@ public class AuthService {
             attempt.setEmail(email);
             attempt.setResendCount(1);
         } else {
-            attempt.setResendCount(attempt.getResendCount() + 1);
+            attempt.setResendCount((attempt.getResendCount() == null ? 0 : attempt.getResendCount()) + 1);
         }
 
         attempt.setLastResendTime(now);

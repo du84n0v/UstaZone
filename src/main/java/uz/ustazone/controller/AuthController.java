@@ -1,5 +1,7 @@
 package uz.ustazone.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -14,43 +16,39 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/auth")
+@Tag(name = "Auth API", description = "API list for authorization")
 public class AuthController {
 
     @Autowired
     private AuthService authService;
 
-    @PostMapping(value = "/register/master", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    ResponseEntity<String> registerMaster(@Valid
-                                    @RequestPart("data") MasterRegisterDTO dto,
-                                    @RequestPart(value = "passportImg", required = false) MultipartFile passportImg,
-                                    @RequestPart(value = "selfieImg", required = false) MultipartFile selfieImg,
-                                    @RequestPart(value = "certificates", required = false) List<MultipartFile> certificates,
-                                    @RequestPart(value = "profileImg", required = false) MultipartFile profileImg){
-        return ResponseEntity.ok(authService.registerMaster(
-                dto,
-                passportImg,
-                selfieImg,
-                certificates,
-                profileImg));
+    @PostMapping("/register/master")
+    @Operation(summary = "Register", description = "API used for register only Master")
+    ResponseEntity<String> registerMaster(@Valid @RequestBody MasterRegisterDTO dto) {
+        return ResponseEntity.ok(authService.registerMaster(dto));
     }
 
     @PostMapping("/register/client")
-    ResponseEntity<String> registerClient(@Valid @RequestBody ClientRegisterDTO dto){
+    @Operation(summary = "Register", description = "API used for register only Client")
+    ResponseEntity<String> registerClient(@Valid @RequestBody ClientRegisterDTO dto) {
         return ResponseEntity.ok(authService.registerClient(dto));
     }
 
     @PostMapping("/verify")
+    @Operation(summary = "Verify", description = "API used for verify email after registration")
     public ResponseEntity<String> verify(@Valid @RequestBody VerificationDTO dto) {
         return ResponseEntity.ok(authService.verify(dto));
     }
 
     @PostMapping("/resend-code")
-    public ResponseEntity<String> resendCode(@Valid @RequestBody ResendCodeDTO dto){
+    @Operation(summary = "Resend-code", description = "API used for resend email code")
+    public ResponseEntity<String> resendCode(@Valid @RequestBody ResendCodeDTO dto) {
         return ResponseEntity.ok(authService.resendCode(dto));
     }
 
     @PostMapping("/login")
-    public ResponseEntity<MasterResponseDTO> login(@Valid @RequestBody LoginRequestDTO dto){
+    @Operation(summary = "Login", description = "API used for login")
+    public ResponseEntity<MasterResponseDTO> login(@Valid @RequestBody LoginRequestDTO dto) {
         return ResponseEntity.ok(authService.login(dto));
     }
 }

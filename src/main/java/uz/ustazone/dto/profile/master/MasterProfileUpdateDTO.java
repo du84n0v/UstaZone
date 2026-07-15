@@ -2,6 +2,7 @@ package uz.ustazone.dto.profile.master;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -18,13 +19,13 @@ public class MasterProfileUpdateDTO {
     private String region;
     @NotBlank
     private String city;
-    @NotBlank
+    @NotNull
     private Double latitude;
-    @NotBlank
+    @NotNull
     private Double longitude;
     @NotBlank
     private String bio;
-    @NotBlank
+    @NotNull
     private Integer searchRadius;
     @NotEmpty
     private List<String> skills;

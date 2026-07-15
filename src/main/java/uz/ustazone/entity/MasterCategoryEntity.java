@@ -27,7 +27,7 @@ public class MasterCategoryEntity {
     @JoinColumn(name = "master_profile_id", nullable = false, insertable = false, updatable = false)
     private MasterProfileEntity masterProfile;
 
-    @Column(name = "catedory_id")
+    @Column(name = "category_id")
     private String categoryId;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", nullable = false, insertable = false, updatable = false)

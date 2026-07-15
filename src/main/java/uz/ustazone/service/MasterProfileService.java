@@ -51,17 +51,7 @@ public class MasterProfileService {
 
     public void save(
             String profileId,
-            MasterRegisterDTO dto,
-            MultipartFile passportImg,
-            MultipartFile selfieImg,
-            List<MultipartFile> certificates) {
-
-        Optional<MasterProfileEntity> optional = masterProfileRepository.findById(profileId);
-        if (optional.isPresent()) {
-            if (optional.get().getIdDocumentAttachId() != null)
-                attachService.delete(optional.get().getIdDocumentAttachId());
-            if (optional.get().getSelfieAttachId() != null) attachService.delete(optional.get().getSelfieAttachId());
-        }
+            MasterRegisterDTO dto) {
 
         MasterProfileEntity master = new MasterProfileEntity();
         master.setId(profileId);
@@ -72,20 +62,13 @@ public class MasterProfileService {
         if (dto.getBankAccountNumber() != null) master.setCardNumber(dto.getBankCardNumber());
         if (dto.getBankAccountNumber() != null) master.setBankAccount(dto.getBankAccountNumber());
 
+        masterProfileRepository.save(master);
+
         masterCategoryService.merge(profileId, dto.getCategoryIds());
 
         masterWorkDayService.merge(profileId, dto.getWorkDays(), dto.getWorkStart(), dto.getWorkEnd());
 
-        if (!passportImg.isEmpty()) {
-            master.setIdDocumentAttachId(attachService.upload(passportImg));
-        }
-        if (!selfieImg.isEmpty()) {
-            master.setSelfieAttachId(attachService.upload(selfieImg));
-        }
-
-        masterCertificateService.merge(profileId, certificates);
-
-        masterProfileRepository.save(master);
+        masterCertificateService.merge(profileId, dto.getCertificateIds());
     }
 
     public MasterCabinetResponseDTO getMasterCabinetInfo(String masterId) {
@@ -221,8 +204,8 @@ public class MasterProfileService {
     }
 
     public String updatePrices(String masterId, List<MasterServicePriceUpdateDTO> dtoList) {
-        ProfileEntity  profile = profileRepository.getById(masterId)
-                        .orElseThrow(() -> new ItemNotFoundException("Profile not found"));
+        profileRepository.getById(masterId)
+                .orElseThrow(() -> new ItemNotFoundException("Profile not found"));
 
         masterCategoryService.updateCategoryPrice(dtoList);
 
