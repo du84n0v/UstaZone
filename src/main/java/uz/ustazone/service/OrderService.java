@@ -1,12 +1,18 @@
 package uz.ustazone.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import uz.ustazone.dto.category.CategoryShortInfoDTO;
 import uz.ustazone.dto.order.OrderCreateDTO;
+import uz.ustazone.dto.order.OrderShortResponseDTO;
 import uz.ustazone.entity.OrderCategoryEntity;
 import uz.ustazone.entity.OrderEntity;
 import uz.ustazone.enums.OrderStatusEnum;
+import uz.ustazone.repository.MasterProfileRepository;
 import uz.ustazone.repository.OrderRepository;
 
 import java.math.BigDecimal;
@@ -70,5 +76,36 @@ public class OrderService {
         //Hali bularni bilmayman. Organganimdan keyin qilaman
 
         return "Successfully created";
+    }
+
+    @Transactional(readOnly = true)
+    public Page<OrderShortResponseDTO> getPublicOrders(List<String> categoryIds, String city, Integer page, Integer size) {
+        Pageable pageable = PageRequest.of(page, size);
+
+        // Faqat PENDING (faol, hech kim olmagan) e'lonlarni chiqaramiz
+        Page<OrderEntity> orderPage = orderRepository.findPublicOrders(
+                OrderStatusEnum.PENDING,
+                categoryIds,
+                city,
+                pageable
+        );
+
+        // Entity -> DTO mapping
+        return orderPage.map(order ->
+                OrderShortResponseDTO.builder()
+                        .id(order.getId())
+                        .title(order.getTitle())
+                        .amount(order.getAmount())
+                        .status(order.getStatus().name())
+                        .createdDate(order.getCreatedDate())
+                        .city(order.getCity())
+                        // Ko'cha va uyni yashiramiz, faqat umumiy tuman darajasida ko'rsatamiz
+                        .address(order.getCity() + " tumani")
+                        .isEmergency(order.getIsEmergency())
+                        .categories(order.getCategories().stream()
+                                .map(oc -> new CategoryShortInfoDTO(oc.getCategoryId(), oc.getCategory().getNameUz()))
+                                .toList())
+                        .build()
+        );
     }
 }

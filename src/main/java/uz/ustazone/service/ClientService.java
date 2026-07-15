@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uz.ustazone.dto.address.ClientAddressResponseDTO;
+import uz.ustazone.dto.category.CategoryShortInfoDTO;
 import uz.ustazone.dto.order.OrderShortResponseDTO;
 import uz.ustazone.dto.profile.ClientCabinetResponseDTO;
 import uz.ustazone.dto.profile.MasterPublicProfileDTO;
@@ -73,7 +74,7 @@ public class ClientService {
                         .status(order.getStatus().name())
                         .createdDate(order.getCreatedDate())
                         .categories(order.getCategories().stream()
-                                .map(oc -> oc.getCategory().getNameUz()) // Kategoriyalar nomlari listi
+                                .map(oc -> new CategoryShortInfoDTO(oc.getCategoryId(), oc.getCategory().getNameUz())) // Kategoriyalar nomlari listi
                                 .toList())
                         .build()
         ).toList();

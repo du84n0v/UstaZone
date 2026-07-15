@@ -3,6 +3,8 @@ package uz.ustazone.dto.order;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+import uz.ustazone.dto.category.CategoryShortInfoDTO;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -23,7 +25,7 @@ public class OrderShortResponseDTO {
     private String address;          // "Yunusobod tumani, 4-kvartal, 12-uy"
 
     // --- BOG'LIQ XIZMATLAR ---
-    private List<String> categories; // Buyurtma ichidagi tanlangan sub-kategoriyalar nomlari ro'yxati (masalan: ["Devor bo'yash", "Shpaklyovka"])
+    private List<CategoryShortInfoDTO> categories; // Buyurtma ichidagi tanlangan sub-kategoriyalar nomlari ro'yxati (masalan: ["Devor bo'yash", "Shpaklyovka"])
     
     // --- QO'SHIMCHA FLAGLAR (UI dizayni uchun) ---
     private Boolean isEmergency;     // Agar true bo'lsa, UI-da "SOS" yoki qizil chiroq bilan yorqinroq ajratib ko'rsatiladi
