@@ -1,8 +1,6 @@
 package uz.ustazone.repository;
 
 import jakarta.transaction.Transactional;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.PositiveOrZero;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;

@@ -1,27 +1,27 @@
-package uz.ustazone.service;
+package uz.ustazone.service.profile.master;
 
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 import uz.ustazone.dto.auth.MasterRegisterDTO;
-import uz.ustazone.dto.profile.EmailVerifyRequestDTO;
-import uz.ustazone.dto.profile.PasswordUpdateDTO;
+import uz.ustazone.dto.profile.general.EmailVerifyRequestDTO;
+import uz.ustazone.dto.profile.general.PasswordUpdateDTO;
 import uz.ustazone.dto.profile.master.*;
 import uz.ustazone.entity.*;
 import uz.ustazone.enums.OrderStatusEnum;
-import uz.ustazone.enums.PriceTypeEnum;
 import uz.ustazone.exception.AppBadRequestException;
 import uz.ustazone.exception.ItemNotFoundException;
 import uz.ustazone.repository.MasterProfileRepository;
 import uz.ustazone.repository.MasterWorkDayRepository;
 import uz.ustazone.repository.OrderRepository;
 import uz.ustazone.repository.ProfileRepository;
+import uz.ustazone.service.AttachService;
+import uz.ustazone.service.MailSenderService;
+import uz.ustazone.service.VerificationService;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class MasterProfileService {
@@ -182,7 +182,7 @@ public class MasterProfileService {
     }
 
     public String updateEmail(String masterId, String newEmail) {
-        ProfileEntity profile = profileRepository.findById(masterId)
+        profileRepository.findById(masterId)
                 .orElseThrow(() -> new ItemNotFoundException("Profile not found"));
 
         senderService.verificationCode(newEmail);

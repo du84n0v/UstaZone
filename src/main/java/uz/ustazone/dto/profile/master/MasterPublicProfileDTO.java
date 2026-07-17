@@ -1,10 +1,6 @@
-package uz.ustazone.dto.profile;
+package uz.ustazone.dto.profile.master;
 
 import lombok.*;
-import uz.ustazone.dto.profile.master.LocationDTO;
-import uz.ustazone.dto.profile.master.MasterServicePriceDTO;
-import uz.ustazone.dto.profile.master.MasterWorkDayDTO;
-import uz.ustazone.dto.profile.master.ProfessionalDTO;
 
 import java.util.List;
 

@@ -7,14 +7,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import uz.ustazone.dto.profile.EmailChangeRequestDTO;
-import uz.ustazone.dto.profile.EmailVerifyRequestDTO;
-import uz.ustazone.dto.profile.PasswordUpdateDTO;
+import uz.ustazone.dto.profile.general.EmailChangeRequestDTO;
+import uz.ustazone.dto.profile.general.EmailVerifyRequestDTO;
+import uz.ustazone.dto.profile.general.PasswordUpdateDTO;
 import uz.ustazone.dto.profile.master.MasterCabinetResponseDTO;
 import uz.ustazone.dto.profile.master.MasterProfileUpdateDTO;
 import uz.ustazone.dto.profile.master.MasterScheduleUpdateDTO;
 import uz.ustazone.dto.profile.master.MasterServicePriceUpdateDTO;
-import uz.ustazone.service.MasterProfileService;
+import uz.ustazone.service.profile.master.MasterProfileService;
 import uz.ustazone.util.SpringSecurityUtil;
 
 import java.util.List;

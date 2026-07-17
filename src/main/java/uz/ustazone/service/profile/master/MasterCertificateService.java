@@ -1,9 +1,10 @@
-package uz.ustazone.service;
+package uz.ustazone.service.profile.master;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uz.ustazone.entity.MasterCertificateEntity;
 import uz.ustazone.repository.MasterCertificateRepository;
+import uz.ustazone.service.AttachService;
 
 import java.util.ArrayList;
 import java.util.List;

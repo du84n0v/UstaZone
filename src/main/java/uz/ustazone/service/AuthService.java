@@ -9,13 +9,11 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 import uz.ustazone.config.security.CustomUserDetails;
 import uz.ustazone.dto.auth.*;
-import uz.ustazone.dto.profile.CurrentProfileDTO;
-import uz.ustazone.dto.profile.MasterResponseDTO;
+import uz.ustazone.dto.profile.general.CurrentProfileDTO;
+import uz.ustazone.dto.profile.master.MasterResponseDTO;
 import uz.ustazone.dto.security.JwtDTO;
-import uz.ustazone.entity.EmailHistoryEntity;
 import uz.ustazone.entity.ProfileEntity;
 import uz.ustazone.entity.VerificationAttemptEntity;
 import uz.ustazone.enums.GeneralStatusEnum;
@@ -24,11 +22,11 @@ import uz.ustazone.exception.AppBadRequestException;
 import uz.ustazone.exception.ItemNotFoundException;
 import uz.ustazone.repository.ProfileRepository;
 import uz.ustazone.repository.VerificationAttemptRepository;
+import uz.ustazone.service.profile.master.MasterProfileService;
 import uz.ustazone.util.JwtUtil;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 
 @Service

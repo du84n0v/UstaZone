@@ -9,9 +9,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import uz.ustazone.dto.profile.ClientCabinetResponseDTO;
-import uz.ustazone.dto.profile.MasterPublicProfileDTO;
-import uz.ustazone.service.ClientService;
+import uz.ustazone.dto.profile.client.ClientCabinetResponseDTO;
+import uz.ustazone.dto.profile.master.MasterPublicProfileDTO;
+import uz.ustazone.service.profile.client.ClientService;
 import uz.ustazone.util.SpringSecurityUtil;
 
 @RestController

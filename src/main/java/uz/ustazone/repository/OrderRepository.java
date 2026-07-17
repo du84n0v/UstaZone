@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 import uz.ustazone.entity.OrderEntity;
 import uz.ustazone.enums.OrderStatusEnum;
 
+import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.List;
 
@@ -35,4 +36,7 @@ public interface OrderRepository extends CrudRepository<OrderEntity, Long> {
             @Param("city") String city,
             Pageable pageable
     );
+
+    @Query("SELECT SUM(o.commissionAmount) FROM OrderEntity o")
+    BigDecimal sumTotalCommission();
 }

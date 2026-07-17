@@ -1,9 +1,10 @@
-package uz.ustazone.dto.profile;
+package uz.ustazone.dto.profile.master;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import uz.ustazone.dto.profile.general.CurrentProfileDTO;
 
 @Getter
 @Setter

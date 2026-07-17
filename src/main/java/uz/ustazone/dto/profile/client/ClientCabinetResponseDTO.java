@@ -1,4 +1,4 @@
-package uz.ustazone.dto.profile;
+package uz.ustazone.dto.profile.client;
 
 import lombok.*;
 import uz.ustazone.dto.address.ClientAddressResponseDTO;

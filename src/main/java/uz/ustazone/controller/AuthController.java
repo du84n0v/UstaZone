@@ -4,15 +4,11 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 import uz.ustazone.dto.auth.*;
-import uz.ustazone.dto.profile.MasterResponseDTO;
+import uz.ustazone.dto.profile.master.MasterResponseDTO;
 import uz.ustazone.service.AuthService;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/auth")
