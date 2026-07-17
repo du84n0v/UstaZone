@@ -1,4 +1,4 @@
-package uz.ustazone.service;
+package uz.ustazone.service.profile.client;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

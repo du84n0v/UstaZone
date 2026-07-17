@@ -1,4 +1,4 @@
-package uz.ustazone.dto.profile;
+package uz.ustazone.dto.profile.general;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

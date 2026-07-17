@@ -12,7 +12,6 @@ import uz.ustazone.dto.order.OrderShortResponseDTO;
 import uz.ustazone.entity.OrderCategoryEntity;
 import uz.ustazone.entity.OrderEntity;
 import uz.ustazone.enums.OrderStatusEnum;
-import uz.ustazone.repository.MasterProfileRepository;
 import uz.ustazone.repository.OrderRepository;
 
 import java.math.BigDecimal;

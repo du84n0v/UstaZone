@@ -37,7 +37,12 @@ public class SpringConfig {
     public static final String[] AUTH_WHITELIST = {
             "/api/v1/auth/**",
             "/api/v1/client/master/{masterId}/public-profile",
-            "/api/v1/public/orders"
+            "/api/v1/public/orders",
+            "/api/v1/master/public-profile/{masterId}",
+            "/api/v1/attach/**",
+            "/v3/api-docs/**",
+            "/swagger-ui/**",
+            "/swagger-ui.html"
     };
 
     @Bean

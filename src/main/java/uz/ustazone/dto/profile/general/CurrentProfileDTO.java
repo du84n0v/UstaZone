@@ -1,4 +1,4 @@
-package uz.ustazone.dto.profile;
+package uz.ustazone.dto.profile.general;
 
 import lombok.Getter;
 import lombok.Setter;

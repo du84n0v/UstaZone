@@ -1,27 +1,27 @@
-package uz.ustazone.service;
+package uz.ustazone.service.profile.master;
 
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 import uz.ustazone.dto.auth.MasterRegisterDTO;
-import uz.ustazone.dto.profile.EmailVerifyRequestDTO;
-import uz.ustazone.dto.profile.PasswordUpdateDTO;
+import uz.ustazone.dto.profile.general.EmailVerifyRequestDTO;
+import uz.ustazone.dto.profile.general.PasswordUpdateDTO;
 import uz.ustazone.dto.profile.master.*;
 import uz.ustazone.entity.*;
 import uz.ustazone.enums.OrderStatusEnum;
-import uz.ustazone.enums.PriceTypeEnum;
 import uz.ustazone.exception.AppBadRequestException;
 import uz.ustazone.exception.ItemNotFoundException;
 import uz.ustazone.repository.MasterProfileRepository;
 import uz.ustazone.repository.MasterWorkDayRepository;
 import uz.ustazone.repository.OrderRepository;
 import uz.ustazone.repository.ProfileRepository;
+import uz.ustazone.service.AttachService;
+import uz.ustazone.service.MailSenderService;
+import uz.ustazone.service.VerificationService;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class MasterProfileService {
@@ -51,17 +51,7 @@ public class MasterProfileService {
 
     public void save(
             String profileId,
-            MasterRegisterDTO dto,
-            MultipartFile passportImg,
-            MultipartFile selfieImg,
-            List<MultipartFile> certificates) {
-
-        Optional<MasterProfileEntity> optional = masterProfileRepository.findById(profileId);
-        if (optional.isPresent()) {
-            if (optional.get().getIdDocumentAttachId() != null)
-                attachService.delete(optional.get().getIdDocumentAttachId());
-            if (optional.get().getSelfieAttachId() != null) attachService.delete(optional.get().getSelfieAttachId());
-        }
+            MasterRegisterDTO dto) {
 
         MasterProfileEntity master = new MasterProfileEntity();
         master.setId(profileId);
@@ -72,20 +62,13 @@ public class MasterProfileService {
         if (dto.getBankAccountNumber() != null) master.setCardNumber(dto.getBankCardNumber());
         if (dto.getBankAccountNumber() != null) master.setBankAccount(dto.getBankAccountNumber());
 
+        masterProfileRepository.save(master);
+
         masterCategoryService.merge(profileId, dto.getCategoryIds());
 
         masterWorkDayService.merge(profileId, dto.getWorkDays(), dto.getWorkStart(), dto.getWorkEnd());
 
-        if (!passportImg.isEmpty()) {
-            master.setIdDocumentAttachId(attachService.upload(passportImg));
-        }
-        if (!selfieImg.isEmpty()) {
-            master.setSelfieAttachId(attachService.upload(selfieImg));
-        }
-
-        masterCertificateService.merge(profileId, certificates);
-
-        masterProfileRepository.save(master);
+        masterCertificateService.merge(profileId, dto.getCertificateIds());
     }
 
     public MasterCabinetResponseDTO getMasterCabinetInfo(String masterId) {
@@ -199,7 +182,7 @@ public class MasterProfileService {
     }
 
     public String updateEmail(String masterId, String newEmail) {
-        ProfileEntity profile = profileRepository.findById(masterId)
+        profileRepository.findById(masterId)
                 .orElseThrow(() -> new ItemNotFoundException("Profile not found"));
 
         senderService.verificationCode(newEmail);
@@ -221,8 +204,8 @@ public class MasterProfileService {
     }
 
     public String updatePrices(String masterId, List<MasterServicePriceUpdateDTO> dtoList) {
-        ProfileEntity  profile = profileRepository.getById(masterId)
-                        .orElseThrow(() -> new ItemNotFoundException("Profile not found"));
+        profileRepository.getById(masterId)
+                .orElseThrow(() -> new ItemNotFoundException("Profile not found"));
 
         masterCategoryService.updateCategoryPrice(dtoList);
 

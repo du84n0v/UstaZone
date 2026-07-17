@@ -1,4 +1,4 @@
-package uz.ustazone.service;
+package uz.ustazone.service.profile.client;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -6,8 +6,8 @@ import org.springframework.transaction.annotation.Transactional;
 import uz.ustazone.dto.address.ClientAddressResponseDTO;
 import uz.ustazone.dto.category.CategoryShortInfoDTO;
 import uz.ustazone.dto.order.OrderShortResponseDTO;
-import uz.ustazone.dto.profile.ClientCabinetResponseDTO;
-import uz.ustazone.dto.profile.MasterPublicProfileDTO;
+import uz.ustazone.dto.profile.client.ClientCabinetResponseDTO;
+import uz.ustazone.dto.profile.master.MasterPublicProfileDTO;
 import uz.ustazone.dto.profile.master.LocationDTO;
 import uz.ustazone.dto.profile.master.MasterServicePriceDTO;
 import uz.ustazone.dto.profile.master.MasterWorkDayDTO;
@@ -16,6 +16,7 @@ import uz.ustazone.entity.*;
 import uz.ustazone.enums.OrderStatusEnum;
 import uz.ustazone.exception.ItemNotFoundException;
 import uz.ustazone.repository.*;
+import uz.ustazone.service.AttachService;
 
 import java.math.BigDecimal;
 import java.util.List;
