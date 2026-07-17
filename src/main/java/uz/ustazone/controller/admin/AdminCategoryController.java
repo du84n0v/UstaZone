@@ -26,7 +26,6 @@ public class AdminCategoryController {
 
     @PostMapping
     public ResponseEntity<String> createCategory(@Valid @RequestBody CategoryRequestDTO dto) {
-        ;
         return ResponseEntity.ok(adminCategoryService.create(dto));
     }
 

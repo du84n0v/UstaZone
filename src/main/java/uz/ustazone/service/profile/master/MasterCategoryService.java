@@ -43,7 +43,7 @@ public class MasterCategoryService {
     @Transactional
     public void updateCategoryPrice(List<MasterServicePriceUpdateDTO> dtoList) {
         for (MasterServicePriceUpdateDTO dto : dtoList) {
-            int effRow = 0;
+            int effRow;
             if(dto.getPriceType().equals(PriceTypeEnum.FROM)) {
                 effRow = masterCategoryRepository.updateCategoryPrice(dto.getId(), dto.getPriceType(), dto.getMinPrice(), dto.getMaxPrice());
             }

@@ -27,20 +27,6 @@ public interface ProfileRepository extends CrudRepository<ProfileEntity, String>
 
     long countByRole(ProfileRoleEnum profileRoleEnum);
 
-    Optional<ProfileEntity> findByIdAndRole(String id, ProfileRoleEnum role);
-
-    @Query("SELECT p FROM ProfileEntity p " +
-            "WHERE p.role = :role " +
-            "AND (:search IS NULL OR " +
-            "     LOWER(p.fullName) LIKE :search OR " +
-            "     p.phone LIKE :search) " +
-            "ORDER BY p.createdDate DESC")
-    Page<ProfileEntity> findMastersForAdmin(
-            @Param("role") ProfileRoleEnum role,
-            @Param("search") String search,
-            Pageable pageable
-    );
-
     @Transactional
     @Modifying
     @Query("UPDATE ProfileEntity  p SET p.status = ?2 WHERE p.id = ?1" )
