@@ -1,12 +1,9 @@
 package uz.ustazone.repository;
 
 import jakarta.transaction.Transactional;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
-import org.springframework.data.repository.query.Param;
 import uz.ustazone.entity.ProfileEntity;
 import uz.ustazone.enums.GeneralStatusEnum;
 import uz.ustazone.enums.ProfileRoleEnum;
