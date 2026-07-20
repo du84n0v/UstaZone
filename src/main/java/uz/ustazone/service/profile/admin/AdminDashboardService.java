@@ -25,7 +25,7 @@ public class AdminDashboardService {
     @Transactional(readOnly = true)
     public AdminDashboardStatsDTO getDashboardStats() {
         // 1. Jami ustalar soni (Roli MASTER bo'lgan profillar)
-        long totalMasters = profileRepository.countByRole(ProfileRoleEnum.MASTER);
+        long totalMasters = profileRepository.countByRole(ProfileRoleEnum.ROLE_MASTER);
 
         // 2. Jami buyurtmalar soni
         long totalOrders = orderRepository.count();
