@@ -24,7 +24,7 @@ public class OrderController {
     @Autowired
     private OrderService orderService;
 
-    @PreAuthorize("hasAnyAuthority('MASTER', 'CLIENT')")
+    @PreAuthorize("hasAnyRole('MASTER', 'CLIENT')")
     @PostMapping
     @Operation(summary = "Create", description = "API used for Create Order")
     public ResponseEntity<String> createOrder(@Valid @RequestBody OrderCreateDTO dto) {

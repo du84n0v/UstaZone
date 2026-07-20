@@ -8,7 +8,7 @@ import uz.ustazone.enums.ComplaintStatusEnum;
 import uz.ustazone.repository.ProfileRepository;
 import uz.ustazone.repository.OrderRepository;
 import uz.ustazone.repository.ComplaintRepository; // Agar shikoyatlar repozitoriyasi bo'lsa
-import uz.ustazone.enums.ProfileRoleEnum; // User rollari uchun enum (CLIENT, MASTER, ADMIN)
+import uz.ustazone.enums.ProfileRoleEnum; // User rollari uchun enum (ROLE_CLIENT, MASTER, ADMIN)
 
 import java.math.BigDecimal;
 
@@ -25,7 +25,7 @@ public class AdminDashboardService {
     @Transactional(readOnly = true)
     public AdminDashboardStatsDTO getDashboardStats() {
         // 1. Jami ustalar soni (Roli MASTER bo'lgan profillar)
-        long totalMasters = profileRepository.countByRole(ProfileRoleEnum.MASTER);
+        long totalMasters = profileRepository.countByRole(ProfileRoleEnum.ROLE_MASTER);
 
         // 2. Jami buyurtmalar soni
         long totalOrders = orderRepository.count();

@@ -28,7 +28,7 @@ public class SubscriptionPlanEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "audience", nullable = false)
-    private SubscriptionAudienceEnum audience; // CLIENT, MASTER
+    private SubscriptionAudienceEnum audience; // ROLE_CLIENT, MASTER
 
     @Column(name = "price", nullable = false)
     @Builder.Default

@@ -25,7 +25,7 @@ public class PromoRedemptionEntity {
     @JoinColumn(name = "promo_code_id", insertable = false, updatable = false)
     private PromoCodeEntity promoCode;
 
-    // --- PROFILE (CLIENT) BOG'LANISHI ---
+    // --- PROFILE (ROLE_CLIENT) BOG'LANISHI ---
     @Column(name = "profile_id", nullable = false)
     private String profileId;
     @ManyToOne(fetch = FetchType.LAZY)

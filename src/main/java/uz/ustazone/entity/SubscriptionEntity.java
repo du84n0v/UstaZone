@@ -37,7 +37,7 @@ public class SubscriptionEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "audience", nullable = false)
-    private SubscriptionAudienceEnum audience; // CLIENT, MASTER
+    private SubscriptionAudienceEnum audience; // ROLE_CLIENT, MASTER
 
     @Enumerated(EnumType.STRING)
     @Column(name = "billing_period", nullable = false)

@@ -1,7 +1,7 @@
 package uz.ustazone.enums;
 
 public enum ProfileRoleEnum {
-    CLIENT,
-    MASTER,
-    ADMIN
+    ROLE_CLIENT,
+    ROLE_MASTER,
+    ROLE_ADMIN
 }
