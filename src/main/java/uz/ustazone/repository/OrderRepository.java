@@ -24,18 +24,60 @@ public interface OrderRepository extends CrudRepository<OrderEntity, Long> {
 
     List<OrderEntity> findAllByClientIdAndStatusInOrderByCreatedDateDesc(String clientId, List<OrderStatusEnum> activeStatuses);
 
-    @Query("SELECT DISTINCT o FROM OrderEntity o " +
-            "LEFT JOIN o.categories oc " +
+
+    // 1. Category bor, city bor
+    @Query("SELECT o.id FROM OrderEntity o " +
+            "JOIN o.categories oc " +
             "WHERE o.status = :status " +
-            "AND (:categoryIds IS NULL OR oc.categoryId IN :categoryIds) " +
-            "AND (:city IS NULL OR LOWER(o.city) = LOWER(:city)) " +
+            "AND oc.categoryId IN :categoryIds " +
+            "AND LOWER(o.city) = LOWER(:city) " +
             "ORDER BY o.createdDate DESC")
-    Page<OrderEntity> findPublicOrders(
+    Page<String> findPublicOrderIdsWithCategoriesAndCity(
             @Param("status") OrderStatusEnum status,
-            @Param("categoryIds") List<String> categoryIds, // List ko'rinishida qabul qiladi
+            @Param("categoryIds") List<String> categoryIds,
             @Param("city") String city,
             Pageable pageable
     );
+
+    // 2. Category bor, city yo'q
+    @Query("SELECT o.id FROM OrderEntity o " +
+            "JOIN o.categories oc " +
+            "WHERE o.status = :status " +
+            "AND oc.categoryId IN :categoryIds " +
+            "ORDER BY o.createdDate DESC")
+    Page<String> findPublicOrderIdsWithCategoriesNoCity(
+            @Param("status") OrderStatusEnum status,
+            @Param("categoryIds") List<String> categoryIds,
+            Pageable pageable
+    );
+
+    // 3. Category yo'q, city yo'q
+    @Query("SELECT o.id FROM OrderEntity o " +
+            "WHERE o.status = :status " +
+            "ORDER BY o.createdDate DESC")
+    Page<String> findPublicOrderIdsNoCity(
+            @Param("status") OrderStatusEnum status,
+            Pageable pageable
+    );
+
+    // 4. Category yo'q, city bor
+    @Query("SELECT o.id FROM OrderEntity o " +
+            "WHERE o.status = :status " +
+            "AND LOWER(o.city) = LOWER(:city) " +
+            "ORDER BY o.createdDate DESC")
+    Page<String> findPublicOrderIdsByCity(
+            @Param("status") OrderStatusEnum status,
+            @Param("city") String city,
+            Pageable pageable
+    );
+
+    // Barcha 4 holat uchun umumiy: ID'lar bo'yicha to'liq entity + category'larni fetch qilib olish
+    @Query("SELECT DISTINCT o FROM OrderEntity o " +
+            "LEFT JOIN FETCH o.categories oc " +
+            "LEFT JOIN FETCH oc.category c " +
+            "WHERE o.id IN :ids " +
+            "ORDER BY o.createdDate DESC")
+    List<OrderEntity> findByIdsWithCategories(@Param("ids") List<String> ids);
 
     @Query("SELECT SUM(o.commissionAmount) FROM OrderEntity o")
     BigDecimal sumTotalCommission();

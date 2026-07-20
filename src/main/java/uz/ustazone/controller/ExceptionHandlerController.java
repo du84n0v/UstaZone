@@ -1,8 +1,10 @@
 package uz.ustazone.controller;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -36,6 +38,11 @@ public class ExceptionHandlerController extends ResponseEntityExceptionHandler {
     public ResponseEntity<?> handle(RuntimeException e){
         e.printStackTrace();
         return ResponseEntity.internalServerError().body(e.getMessage());
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<?> handleAccessDenied(AccessDeniedException e) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Access denied: Sizda ushbu API'ga huquq yo'q!");
     }
 
     @ExceptionHandler(BaseException.class)

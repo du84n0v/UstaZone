@@ -33,7 +33,7 @@ public class OrderController {
     }
 
     @GetMapping
-    @Operation(summary = "Get", description = "API used for getting pending orders for everyone")
+    @Operation(summary = "Get", description = "API used for getting pending orders for everyone by category or region or nothing")
     public ResponseEntity<Page<OrderShortResponseDTO>> getPublicOrders(
             @RequestParam(required = false) List<String> categoryIds,
             @RequestParam(required = false) String region,
