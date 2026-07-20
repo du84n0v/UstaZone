@@ -33,7 +33,7 @@ public class AdminMasterService {
         String searchParam = (search == null || search.trim().isEmpty()) ? null : "%" + search.trim().toLowerCase() + "%";
 
         Page<MasterProfileEntity> masterPage = masterProfileRepository.findMastersForAdmin(
-                ProfileRoleEnum.MASTER,
+                ProfileRoleEnum.ROLE_MASTER,
                 searchParam,
                 pageable
         );

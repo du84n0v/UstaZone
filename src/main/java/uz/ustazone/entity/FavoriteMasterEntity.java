@@ -18,7 +18,7 @@ public class FavoriteMasterEntity {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
-    // --- CLIENT BOG'LANISHI ---
+    // --- ROLE_CLIENT BOG'LANISHI ---
     @Column(name = "client_id", nullable = false)
     private String clientId;
     @ManyToOne(fetch = FetchType.LAZY)

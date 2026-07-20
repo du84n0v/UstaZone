@@ -21,7 +21,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/master")
-@PreAuthorize("hasAuthority('MASTER')")
+@PreAuthorize("hasRole('MASTER')")
 @Tag(name = "Master API", description = "API list for Master")
 public class MasterController {
 

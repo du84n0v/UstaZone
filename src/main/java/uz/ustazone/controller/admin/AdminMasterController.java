@@ -1,6 +1,7 @@
 package uz.ustazone.controller.admin;
 
-import lombok.RequiredArgsConstructor;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -13,7 +14,7 @@ import uz.ustazone.util.PageUtil;
 @RestController
 @RequestMapping("/api/v1/admin/masters")
 @PreAuthorize("hasRole('ADMIN')")
-@RequiredArgsConstructor
+@Tag(name = "Control Master API", description = "API list for admin to control master")
 public class AdminMasterController {
 
     @Autowired
@@ -21,6 +22,7 @@ public class AdminMasterController {
 
     // 1. Ustalarni qidirish va sahifalab olish (Barcha ustalar jadvali uchun)
     @GetMapping
+    @Operation(summary = "Get", description = "API used for getting master search phone or fullname")
     public ResponseEntity<Page<AdminMasterResponseDTO>> getMasters(
             @RequestParam(required = false) String search, // Ism yoki telefon bo'yicha qidiruv
             @RequestParam(defaultValue = "0") int page,
@@ -32,6 +34,7 @@ public class AdminMasterController {
 
     // 3. Ustani rad etish / bloklash
     @PutMapping("/{masterId}/reject")
+    @Operation(summary = "Block", description = "API used for Block master by admin")
     public ResponseEntity<Void> rejectMaster(@PathVariable String masterId) {
         adminMasterService.rejectMaster(masterId);
         return ResponseEntity.ok().build();

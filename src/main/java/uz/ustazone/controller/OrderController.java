@@ -24,7 +24,7 @@ public class OrderController {
     @Autowired
     private OrderService orderService;
 
-    @PreAuthorize("hasAnyAuthority('MASTER', 'CLIENT')")
+    @PreAuthorize("hasAnyRole('MASTER', 'CLIENT')")
     @PostMapping
     @Operation(summary = "Create", description = "API used for Create Order")
     public ResponseEntity<String> createOrder(@Valid @RequestBody OrderCreateDTO dto) {
@@ -33,7 +33,7 @@ public class OrderController {
     }
 
     @GetMapping
-    @Operation(summary = "Get", description = "API used for getting pending orders for everyone")
+    @Operation(summary = "Get", description = "API used for getting pending orders for everyone by category or region or nothing")
     public ResponseEntity<Page<OrderShortResponseDTO>> getPublicOrders(
             @RequestParam(required = false) List<String> categoryIds,
             @RequestParam(required = false) String region,

@@ -74,7 +74,7 @@ public class AuthService {
         profile.setEmail(dto.getEmail());
         profile.setPhone(dto.getPhone());
         profile.setPassword(passwordEncoder.encode(dto.getPassword()));
-        profile.setRole(ProfileRoleEnum.CLIENT);
+        profile.setRole(ProfileRoleEnum.ROLE_CLIENT);
         profile.setStatus(GeneralStatusEnum.IN_REGISTRATION);
 
         profileRepository.save(profile);
@@ -113,7 +113,7 @@ public class AuthService {
         profile.setEmail(dto.getEmail());
         profile.setPhone(dto.getPhone());
         profile.setPassword(passwordEncoder.encode(dto.getPassword()));
-        profile.setRole(ProfileRoleEnum.MASTER);
+        profile.setRole(ProfileRoleEnum.ROLE_MASTER);
         profile.setRegion(dto.getRegion());
         profile.setCity(dto.getCity());
         profile.setLatitude(dto.getLatitude());

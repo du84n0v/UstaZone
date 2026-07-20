@@ -40,6 +40,9 @@ public class SpringConfig {
             "/api/v1/public/orders",
             "/api/v1/master/public-profile/{masterId}",
             "/api/v1/attach/**",
+            "/api/v1/orders",
+
+
             "/v3/api-docs/**",
             "/swagger-ui/**",
             "/swagger-ui.html"

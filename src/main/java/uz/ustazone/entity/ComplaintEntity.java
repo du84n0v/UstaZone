@@ -39,7 +39,7 @@ public class ComplaintEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "type", nullable = false)
-    private ComplaintTypeEnum type; // ORDER, MASTER, CLIENT
+    private ComplaintTypeEnum type; // ORDER, MASTER, ROLE_CLIENT
 
     // --- HOLAT VA VAQT ---
     @Enumerated(EnumType.STRING)

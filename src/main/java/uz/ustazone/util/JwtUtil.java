@@ -15,7 +15,7 @@ import java.util.Map;
 
 @Component
 public class JwtUtil {
-    private static final int accessTokenLiveTime = 1000 * 3600; // 1-hour
+    private static final int accessTokenLiveTime = 1000 * 3600*24; // 1-hour
     private static final long refreshTokenLiveTime = 1000L * 3600 * 24 * 30; // 1-month
     private static String secretKey;
 
