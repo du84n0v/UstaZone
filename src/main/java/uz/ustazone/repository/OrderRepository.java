@@ -81,4 +81,19 @@ public interface OrderRepository extends CrudRepository<OrderEntity, Long> {
 
     @Query("SELECT SUM(o.commissionAmount) FROM OrderEntity o")
     BigDecimal sumTotalCommission();
+
+    @Query(value = "SELECT o FROM OrderEntity o " +
+            "LEFT JOIN FETCH o.client " +
+            "LEFT JOIN FETCH o.master " +
+            "WHERE (:status IS NULL OR o.status = :status) " +
+            "AND (:search IS NULL OR LOWER(CAST(o.title AS string)) LIKE LOWER(CAST(:search AS string))) " +
+            "ORDER BY o.createdDate DESC",
+            countQuery = "SELECT count(o) FROM OrderEntity o " +
+                    "WHERE (:status IS NULL OR o.status = :status) " +
+                    "AND (:search IS NULL OR LOWER(CAST(o.title AS string)) LIKE LOWER(CAST(:search AS string)))")
+    Page<OrderEntity> findOrdersForAdmin(
+            @Param("status") OrderStatusEnum status,
+            @Param("search") String search,
+            Pageable pageable
+    );
 }
