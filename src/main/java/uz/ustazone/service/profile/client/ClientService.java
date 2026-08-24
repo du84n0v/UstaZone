@@ -111,7 +111,7 @@ public class ClientService {
         MasterProfileEntity master = masterProfileRepository.findById(masterId)
                 .orElseThrow(() -> new ItemNotFoundException("Usta topilmadi"));
 
-        ProfileEntity profile = profileRepository.getById(masterId)
+        ProfileEntity profile = profileRepository.findById(masterId)
                 .orElseThrow(() -> new ItemNotFoundException("Usta topilmadi"));
 
         // 2. Ustaning jami tamomlagan ishlari sonini hisoblaymiz (Mijoz ishonchi uchun)
