@@ -1,6 +1,6 @@
 package uz.ustazone.enums;
 
-public enum SubscriptionTierEnum {
+public enum TariffTierEnum {
     FREE,
     BASIC,
     STANDARD,

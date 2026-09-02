@@ -5,8 +5,8 @@ import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import uz.ustazone.enums.BillingPeriodEnum;
-import uz.ustazone.enums.SubscriptionAudienceEnum;
-import uz.ustazone.enums.SubscriptionTierEnum;
+import uz.ustazone.enums.TariffAudienceEnum;
+import uz.ustazone.enums.TariffTierEnum;
 
 import java.time.LocalDateTime;
 
@@ -33,11 +33,11 @@ public class SubscriptionEntity {
     // --- OBUNA DETALLARI ---
     @Enumerated(EnumType.STRING)
     @Column(name = "tier", nullable = false)
-    private SubscriptionTierEnum tier; // FREE, BASIC, PRO va h.k.
+    private TariffTierEnum tier; // FREE, BASIC, PRO va h.k.
 
     @Enumerated(EnumType.STRING)
     @Column(name = "audience", nullable = false)
-    private SubscriptionAudienceEnum audience; // ROLE_CLIENT, MASTER
+    private TariffAudienceEnum audience; // ROLE_CLIENT, MASTER
 
     @Enumerated(EnumType.STRING)
     @Column(name = "billing_period", nullable = false)

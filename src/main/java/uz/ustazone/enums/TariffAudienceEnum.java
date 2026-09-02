@@ -1,6 +1,6 @@
 package uz.ustazone.enums;
 
-public enum SubscriptionAudienceEnum {
+public enum TariffAudienceEnum {
     CLIENT,
     MASTER
 }
