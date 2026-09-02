@@ -4,7 +4,7 @@ import uz.ustazone.enums.VerificationStatusEnum;
 
 import java.time.LocalDateTime;
 
-public interface AdminVerificationMastersMapper {
+public interface AdminVerificationViewMapper {
     String getId();
     String getMasterId();
     String getFullName();

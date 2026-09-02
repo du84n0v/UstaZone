@@ -13,4 +13,7 @@ public interface MasterCertificateRepository extends CrudRepository<MasterCertif
     @Query("SELECT mc.attachId FROM MasterCertificateEntity mc " +
             " WHERE mc.masterProfileId = ?1")
     List<String> getProfileCertificateIds(String profileId);
+
+    @Query("SELECT mc.attachId FROM MasterCertificateEntity mc WHERE mc.masterProfileId = ?1")
+    List<String> getAllMasterCertificates(String masterProfileId);
 }

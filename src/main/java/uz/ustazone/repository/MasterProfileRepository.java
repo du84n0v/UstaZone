@@ -22,4 +22,5 @@ public interface MasterProfileRepository extends CrudRepository<MasterProfileEnt
             @Param("search") String search,
             Pageable pageable
     );
+
 }

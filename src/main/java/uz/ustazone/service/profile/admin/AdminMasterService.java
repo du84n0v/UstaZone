@@ -1,6 +1,5 @@
 package uz.ustazone.service.profile.admin;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -17,7 +16,6 @@ import uz.ustazone.repository.MasterProfileRepository;
 import uz.ustazone.repository.ProfileRepository;
 
 @Service
-@RequiredArgsConstructor
 public class AdminMasterService {
 
     @Autowired

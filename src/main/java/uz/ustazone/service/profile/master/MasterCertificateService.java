@@ -37,4 +37,8 @@ public class MasterCertificateService {
 
         masterCertificateRepository.saveAll(ls);
     }
+
+    public List<String> getMasterCertificates(String masterId) {
+        return masterCertificateRepository.getAllMasterCertificates(masterId);
+    }
 }

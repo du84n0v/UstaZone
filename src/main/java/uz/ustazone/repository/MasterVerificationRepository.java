@@ -8,7 +8,7 @@ import org.springframework.data.repository.query.Param;
 import uz.ustazone.entity.MasterVerificationEntity;
 import uz.ustazone.enums.GeneralStatusEnum;
 import uz.ustazone.enums.VerificationStatusEnum;
-import uz.ustazone.mapper.admin.AdminVerificationMastersMapper;
+import uz.ustazone.mapper.admin.AdminVerificationViewMapper;
 
 public interface MasterVerificationRepository extends CrudRepository<MasterVerificationEntity, String> {
 
@@ -23,7 +23,19 @@ public interface MasterVerificationRepository extends CrudRepository<MasterVerif
             " WHERE p.visible = true " +
             " AND p.status = :profileStatus " +
             " AND mv.status = :verificationStatus")
-    Page<AdminVerificationMastersMapper> getActiveMaster(Pageable pageable,
-                                                         @Param("profileStatus") GeneralStatusEnum status,
-                                                         @Param("verificationStatus") VerificationStatusEnum verificationStatus);
+    Page<AdminVerificationViewMapper> getApplicationByStatus(Pageable pageable,
+                                                             @Param("profileStatus") GeneralStatusEnum status,
+                                                             @Param("verificationStatus") VerificationStatusEnum verificationStatus);
+
+    @Query("SELECT mv.id AS id, " +
+            " mv.profile.id AS masterId, " +
+            " mv.profile.fullName AS fullName, " +
+            " mv.profile.phone AS phone, " +
+            " mv.status AS status, " +
+            " mv.createdDate AS createdDate " +
+            " FROM MasterVerificationEntity mv " +
+            " INNER JOIN mv.profile p " +
+            " WHERE p.visible = true " +
+            " AND mv.id = ?1")
+    AdminVerificationViewMapper getVerMapperById(String id);
 }
