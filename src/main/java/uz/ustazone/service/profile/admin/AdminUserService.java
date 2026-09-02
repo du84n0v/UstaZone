@@ -1,6 +1,6 @@
 package uz.ustazone.service.profile.admin;
 
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -13,10 +13,10 @@ import uz.ustazone.exception.BaseException;
 import uz.ustazone.repository.ProfileRepository;
 
 @Service
-@RequiredArgsConstructor
 public class AdminUserService {
 
-    private final ProfileRepository profileRepository;
+    @Autowired
+    private ProfileRepository profileRepository;
 
     @Transactional(readOnly = true)
     public Page<AdminUserResponseDTO> getUsers(String search, Pageable pageable) {

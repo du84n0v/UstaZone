@@ -91,7 +91,7 @@ public class AttachService {
         }
     }
 
-    public ResponseEntity<org.springframework.core.io.Resource> download(String filename) {
+    public ResponseEntity<Resource> download(String filename) {
         AttachEntity entity = getEntity(filename);
         try {
             Path file = Paths.get(attacheFolder + "/" + entity.getPath() + "/" + entity.getId()).normalize();

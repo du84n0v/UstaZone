@@ -14,10 +14,13 @@ import uz.ustazone.dto.auth.*;
 import uz.ustazone.dto.profile.general.CurrentProfileDTO;
 import uz.ustazone.dto.profile.master.MasterResponseDTO;
 import uz.ustazone.dto.security.JwtDTO;
+import uz.ustazone.entity.MasterVerificationEntity;
+import uz.ustazone.repository.MasterVerificationRepository;
 import uz.ustazone.entity.ProfileEntity;
 import uz.ustazone.entity.VerificationAttemptEntity;
 import uz.ustazone.enums.GeneralStatusEnum;
 import uz.ustazone.enums.ProfileRoleEnum;
+import uz.ustazone.enums.VerificationStatusEnum;
 import uz.ustazone.exception.AppBadRequestException;
 import uz.ustazone.exception.ItemNotFoundException;
 import uz.ustazone.repository.ProfileRepository;
@@ -48,6 +51,8 @@ public class AuthService {
     private VerificationAttemptRepository attemptRepository;
     @Autowired
     private AuthenticationManager authenticationManager;
+    @Autowired
+    private MasterVerificationRepository masterVerificationRepository;
 
     public String registerMaster(MasterRegisterDTO dto) {
 
@@ -60,6 +65,15 @@ public class AuthService {
         profileRepository.save(profile);
 
         masterProfileService.save(profile.getId(), dto);
+
+        MasterVerificationEntity verification = MasterVerificationEntity.builder()
+                .profile(profile)
+                .passportAttachId(dto.getPassportId())
+                .selfieAttachId(dto.getSelfieId())
+                .certificateIds(dto.getCertificateIds())
+                .status(VerificationStatusEnum.PENDING) // Admin tekshirishi uchun navbatga tushadi
+                .build();
+        masterVerificationRepository.save(verification);
 
         sendCode(dto.getEmail());
 
