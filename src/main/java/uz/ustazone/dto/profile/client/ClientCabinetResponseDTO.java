@@ -17,6 +17,9 @@ public class ClientCabinetResponseDTO {
     private String fullName;
     private BigDecimal bonusBalance;
 
+    private Long proTrialDaysLeft; // "7 kun qoldi"
+    private Boolean isProActive;
+
     private Long totalOrdersCount;     // 1-karta: Jami buyurtmalar
     private Long activeOrdersCount;    // 2-karta: Faol buyurtmalar (PENDING, ACCEPTED, ENROUTE, IN_PROGRESS)
     private Long completedOrdersCount; // 3-karta: Bajarilgan (COMPLETED, CONFIRMED, PAID, REVIEWED)

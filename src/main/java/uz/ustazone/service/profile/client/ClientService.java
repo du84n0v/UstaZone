@@ -15,10 +15,14 @@ import uz.ustazone.dto.profile.master.ProfessionalDTO;
 import uz.ustazone.entity.*;
 import uz.ustazone.enums.OrderStatusEnum;
 import uz.ustazone.exception.ItemNotFoundException;
+import uz.ustazone.mapper.OrderStatisticsMapper;
 import uz.ustazone.repository.*;
-import uz.ustazone.service.AttachService;
+import uz.ustazone.service.general.AttachService;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -40,33 +44,26 @@ public class ClientService {
     @Autowired
     private ClientAddressRepository clientAddressRepository;
 
+    private static final List<OrderStatusEnum> ACTIVE_STATUSES = List.of(
+            OrderStatusEnum.PENDING,
+            OrderStatusEnum.ACCEPTED,
+            OrderStatusEnum.EN_ROUTE,
+            OrderStatusEnum.IN_PROGRESS
+    );
+
+    @Transactional(readOnly = true)
     public ClientCabinetResponseDTO getClientCabinetInfo(String clientId) {
+        // 1. Profil ma'lumotlari
         ProfileEntity client = profileRepository.findById(clientId)
-                .orElseThrow(() -> new ItemNotFoundException("Mijoz topilmadi"));
+                .orElseThrow(() -> new ItemNotFoundException("Mijoz topilmadi: " + clientId));
 
-        // 1. Jami buyurtmalar soni
-        Long totalOrders = orderRepository.countByClientId(clientId);
+        OrderStatisticsMapper stats = orderRepository.getClientOrderStatistics(clientId);
+        Long totalOrders = (stats != null) ? stats.getTotalCount() : 0L;
+        Long activeCount = (stats != null) ? stats.getActiveCount() : 0L;
+        Long completedCount = (stats != null) ? stats.getCompletedCount() : 0L;
 
-        // 2. Faol buyurtmalar statuslari (Mijoz uchun hali tugallanmagan jarayon)
-        List<OrderStatusEnum> activeStatuses = List.of(
-                OrderStatusEnum.PENDING,
-                OrderStatusEnum.ACCEPTED,
-                OrderStatusEnum.EN_ROUTE,
-                OrderStatusEnum.IN_PROGRESS
-        );
-        Long activeCount = orderRepository.countByClientIdAndStatusIn(clientId, activeStatuses);
+        List<OrderEntity> activeOrderEntities = orderRepository.findAllClientActiveOrdersWithCategories(clientId, ACTIVE_STATUSES);
 
-        // 3. Bajarilgan buyurtmalar statuslari
-        List<OrderStatusEnum> completedStatuses = List.of(
-                OrderStatusEnum.COMPLETED,
-                OrderStatusEnum.CONFIRMED,
-                OrderStatusEnum.PAID,
-                OrderStatusEnum.REVIEWED
-        );
-        Long completedCount = orderRepository.countByClientIdAndStatusIn(clientId, completedStatuses);
-
-        //clientning orderlari
-        List<OrderEntity> activeOrderEntities = orderRepository.findAllByClientIdAndStatusInOrderByCreatedDateDesc(clientId, activeStatuses);
         List<OrderShortResponseDTO> activeOrderDTOs = activeOrderEntities.stream().map(order ->
                 OrderShortResponseDTO.builder()
                         .id(order.getId())
@@ -74,35 +71,42 @@ public class ClientService {
                         .amount(order.getAmount())
                         .status(order.getStatus().name())
                         .createdDate(order.getCreatedDate())
+                        .region(order.getCity())                    // Tushib qolgan maydon
+                        .address(order.getAddress())              // Tushib qolgan maydon
+                        .isEmergency(order.getIsEmergency())      // Tushib qolgan maydon
                         .categories(order.getCategories().stream()
-                                .map(oc -> new CategoryShortInfoDTO(oc.getCategoryId(), oc.getCategory().getNameUz())) // Kategoriyalar nomlari listi
+                                .map(oc -> new CategoryShortInfoDTO(oc.getCategoryId(), oc.getCategory().getNameUz()))
                                 .toList())
                         .build()
         ).toList();
 
-        //address
-        List<ClientAddressEntity> addresses = clientAddressRepository.findAllByClientId(clientId);
-        List<ClientAddressResponseDTO> addressRes = addresses.stream()
-                .map(ca -> {
-                    ClientAddressResponseDTO dto = new ClientAddressResponseDTO();
-                    dto.setRegion(ca.getRegion());
-                    dto.setCity(ca.getCity());
-                    dto.setAddressLine(ca.getAddressLine());
-                    dto.setType(ca.getAddressType());
-
-                    return dto;})
+        List<ClientAddressEntity> addresses = clientAddressRepository.findAllByClientIdAndVisibleTrueOrderByCreatedDateDesc(clientId);
+        List<ClientAddressResponseDTO> addressDTOs = addresses.stream()
+                .map(ca -> ClientAddressResponseDTO.builder()
+                        .id(ca.getId())
+                        .type(ca.getAddressType())
+                        .addressLine(ca.getAddressLine())
+                        .region(ca.getRegion())
+                        .createdDate(ca.getCreatedDate())
+                        .build())
                 .toList();
 
-        // DTO'ni yig'ib qaytaramiz
+        // 5. Bepul PRO muddati hisobi (Masalan, 14 kunlik sinov)
+        long daysPassed = ChronoUnit.DAYS.between(client.getCreatedDate(), LocalDateTime.now());
+        long proDaysLeft = Math.max(0, 14 - daysPassed);
+
         return ClientCabinetResponseDTO.builder()
                 .id(client.getId())
                 .fullName(client.getFullName())
                 .bonusBalance(client.getBonusBalance() != null ? client.getBonusBalance() : BigDecimal.ZERO)
+                .proTrialDaysLeft(proDaysLeft)
+                .isProActive(proDaysLeft > 0)
                 .totalOrdersCount(totalOrders)
                 .activeOrdersCount(activeCount)
                 .completedOrdersCount(completedCount)
                 .activeOrders(activeOrderDTOs)
-                .addresses(addressRes)
+                .addresses(addressDTOs)
+                .favoriteMasterIds(Collections.emptyList())
                 .build();
     }
 

@@ -1,4 +1,4 @@
-package uz.ustazone.controller;
+package uz.ustazone.controller.client;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -13,13 +13,13 @@ import uz.ustazone.util.SpringSecurityUtil;
 
 @RestController
 @RequestMapping("/api/v1/client")
+@PreAuthorize("hasRole('CLIENT')")
 @Tag(name = "Client API", description = "API list for client")
 public class ClientController {
 
     @Autowired
     private ClientService clientService;
 
-    @PreAuthorize("hasRole('CLIENT')")
     @GetMapping("/cabinet")
     @Operation(summary = "Cabinet", description = "API used for get Client Cabinet")
     public ResponseEntity<ClientCabinetResponseDTO> getClientCabinet() {
@@ -33,4 +33,6 @@ public class ClientController {
         MasterPublicProfileDTO profile = clientService.getMasterPublicProfileForClient(masterId);
         return ResponseEntity.ok(profile);
     }
+
+//    @PostMapping()
 }

@@ -7,23 +7,17 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 import uz.ustazone.entity.OrderEntity;
 import uz.ustazone.enums.OrderStatusEnum;
+import uz.ustazone.mapper.OrderStatisticsMapper;
 
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.List;
 
-public interface OrderRepository extends CrudRepository<OrderEntity, Long> {
+public interface OrderRepository extends CrudRepository<OrderEntity, String> {
 
     Long countByMasterIdAndStatusIn(String masterId, Collection<OrderStatusEnum> statuses);
 
     Long countByMasterIdAndStatus(String masterId, OrderStatusEnum status); // COMPLETED status bilan chaqiriladi
-
-    Long countByClientId(String clientId);
-
-    Long countByClientIdAndStatusIn(String clientId, List<OrderStatusEnum> activeStatuses);
-
-    List<OrderEntity> findAllByClientIdAndStatusInOrderByCreatedDateDesc(String clientId, List<OrderStatusEnum> activeStatuses);
-
 
     // 1. Category bor, city bor
     @Query("SELECT o.id FROM OrderEntity o " +
@@ -94,6 +88,33 @@ public interface OrderRepository extends CrudRepository<OrderEntity, Long> {
     Page<OrderEntity> findOrdersForAdmin(
             @Param("status") OrderStatusEnum status,
             @Param("search") String search,
+            Pageable pageable
+    );
+
+    @Query("SELECT DISTINCT o FROM OrderEntity o " +
+            "LEFT JOIN FETCH o.categories oc " +
+            "LEFT JOIN FETCH oc.category c " +
+            "WHERE o.clientId = :clientId AND o.status IN :statuses " +
+            "ORDER BY o.createdDate DESC")
+    List<OrderEntity> findAllClientActiveOrdersWithCategories(
+            @Param("clientId") String clientId,
+            @Param("statuses") List<OrderStatusEnum> statuses
+    );
+
+    @Query(value = "SELECT " +
+            "COUNT(o.id) AS totalCount, " +
+            "COALESCE(SUM(CASE WHEN o.status IN ('PENDING', 'ACCEPTED', 'EN_ROUTE', 'IN_PROGRESS') THEN 1 ELSE 0 END), 0) AS activeCount, " +
+            "COALESCE(SUM(CASE WHEN o.status IN ('COMPLETED', 'CONFIRMED', 'PAID', 'REVIEWED') THEN 1 ELSE 0 END), 0) AS completedCount " +
+            "FROM orders o WHERE o.client_id = :clientId", nativeQuery = true)
+    OrderStatisticsMapper getClientOrderStatistics(@Param("clientId") String clientId);
+
+    @Query("SELECT o.id FROM OrderEntity o " +
+            "WHERE o.status = :status " +
+            "AND o.id NOT IN :excludedIds " +
+            "ORDER BY o.createdDate DESC")
+    List<String> findLatestOrderIdsExcluding(
+            @Param("status") OrderStatusEnum status,
+            @Param("excludedIds") Collection<String> excludedIds,
             Pageable pageable
     );
 }

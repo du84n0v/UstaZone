@@ -1,4 +1,4 @@
-package uz.ustazone.controller;
+package uz.ustazone.controller.order;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -10,7 +10,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import uz.ustazone.dto.order.OrderCreateDTO;
 import uz.ustazone.dto.order.OrderShortResponseDTO;
-import uz.ustazone.service.OrderService;
+import uz.ustazone.service.order.OrderService;
 import uz.ustazone.util.PageUtil;
 import uz.ustazone.util.SpringSecurityUtil;
 
