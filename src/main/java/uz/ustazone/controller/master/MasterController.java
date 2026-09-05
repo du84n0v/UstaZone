@@ -1,4 +1,4 @@
-package uz.ustazone.controller;
+package uz.ustazone.controller.master;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

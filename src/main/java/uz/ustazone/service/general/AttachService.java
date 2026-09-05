@@ -1,4 +1,4 @@
-package uz.ustazone.service;
+package uz.ustazone.service.general;
 
 import uz.ustazone.dto.attach.AttachDTO;
 import uz.ustazone.entity.AttachEntity;

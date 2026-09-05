@@ -1,4 +1,4 @@
-package uz.ustazone.service;
+package uz.ustazone.service.general;
 
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;

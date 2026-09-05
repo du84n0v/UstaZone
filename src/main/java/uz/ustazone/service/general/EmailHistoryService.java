@@ -1,4 +1,4 @@
-package uz.ustazone.service;
+package uz.ustazone.service.general;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

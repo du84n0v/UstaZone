@@ -1,5 +1,7 @@
 package uz.ustazone.controller.admin;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +16,7 @@ import uz.ustazone.service.profile.admin.AdminComplaintService;
 @RestController
 @RequestMapping("/api/v1/admin/complaints")
 @PreAuthorize("hasRole('ADMIN')")
+@Tag(name = "Admin API", description = "API list for admin to control complains")
 public class AdminComplaintController {
 
     @Autowired
@@ -21,6 +24,7 @@ public class AdminComplaintController {
 
     // 1. Tablar va pagination bo'yicha ro'yxatni olish
     @GetMapping
+    @Operation(summary = "Get", description = "API used for getting complains based on type")
     public ResponseEntity<Page<AdminComplaintViewDTO>> getComplaints(
             @RequestParam(defaultValue = "OPEN") ComplaintTabEnum tab,
             @RequestParam(defaultValue = "0") int page,
@@ -31,12 +35,14 @@ public class AdminComplaintController {
 
     // 2. Bitta shikoyatni ID orqali to'liq ko'rish
     @GetMapping("/{id}")
+    @Operation(summary = "Get", description = "API used for getting one complain details")
     public ResponseEntity<AdminComplaintResponseDTO> getById(@PathVariable String id) {
         return ResponseEntity.ok(adminComplaintService.getById(id));
     }
 
     // 3. Shikoyatni hal qilish (Ko'k tugma: "Hal qilish")
     @PutMapping("/{id}/resolve")
+    @Operation(summary = "Put", description = "API used for resolving complain")
     public ResponseEntity<String> resolveComplaint(
             @PathVariable String id,
             @RequestBody(required = false) AdminComplaintActionDTO dto
@@ -46,6 +52,7 @@ public class AdminComplaintController {
 
     // 4. Shikoyatni rad etish (Qora tugma: "Rad etish")
     @PutMapping("/{id}/reject")
+    @Operation(summary = "Put", description = "API used for rejecting complain")
     public ResponseEntity<String> rejectComplaint(
             @PathVariable String id,
             @RequestBody(required = false) AdminComplaintActionDTO dto

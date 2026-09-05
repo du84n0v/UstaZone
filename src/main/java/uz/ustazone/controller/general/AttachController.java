@@ -1,4 +1,4 @@
-package uz.ustazone.controller;
+package uz.ustazone.controller.general;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -8,7 +8,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import uz.ustazone.service.AttachService;
+import uz.ustazone.service.general.AttachService;
 
 @RestController
 @RequestMapping("/api/v1/attach")

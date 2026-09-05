@@ -21,7 +21,7 @@ public class OrderShortResponseDTO {
     private LocalDateTime createdDate;// Buyurtma qachon ochilgani (masalan, "2 soat oldin" deb chiqarish uchun)
     
     // --- LOKATSIYA ---
-    private String city;             // "Toshkent"
+    private String region;             // "Toshkent"
     private String address;          // "Yunusobod tumani, 4-kvartal, 12-uy"
 
     // --- BOG'LIQ XIZMATLAR ---
