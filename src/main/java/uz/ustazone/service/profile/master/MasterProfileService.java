@@ -16,9 +16,9 @@ import uz.ustazone.repository.MasterProfileRepository;
 import uz.ustazone.repository.MasterWorkDayRepository;
 import uz.ustazone.repository.OrderRepository;
 import uz.ustazone.repository.ProfileRepository;
-import uz.ustazone.service.AttachService;
-import uz.ustazone.service.MailSenderService;
-import uz.ustazone.service.VerificationService;
+import uz.ustazone.service.general.AttachService;
+import uz.ustazone.service.general.MailSenderService;
+import uz.ustazone.service.general.VerificationService;
 
 import java.util.List;
 import java.util.Optional;

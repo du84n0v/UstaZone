@@ -1,4 +1,4 @@
-package uz.ustazone.service;
+package uz.ustazone.service.general;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;

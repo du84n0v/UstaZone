@@ -1,15 +1,14 @@
-package uz.ustazone.controller;
+package uz.ustazone.controller.general;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import uz.ustazone.dto.auth.*;
 import uz.ustazone.dto.profile.master.MasterResponseDTO;
-import uz.ustazone.service.AuthService;
+import uz.ustazone.service.general.AuthService;
 
 @RestController
 @RequestMapping("/api/v1/auth")

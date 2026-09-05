@@ -17,7 +17,7 @@ import uz.ustazone.exception.ItemNotFoundException;
 import uz.ustazone.mapper.admin.AdminVerificationViewMapper;
 import uz.ustazone.repository.MasterProfileRepository;
 import uz.ustazone.repository.MasterVerificationRepository;
-import uz.ustazone.service.AttachService;
+import uz.ustazone.service.general.AttachService;
 import uz.ustazone.service.profile.master.MasterCertificateService;
 
 import java.time.LocalDateTime;

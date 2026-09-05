@@ -1,4 +1,4 @@
-package uz.ustazone.controller;
+package uz.ustazone.controller.general;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;

@@ -18,7 +18,7 @@ import uz.ustazone.exception.ItemNotFoundException;
 import uz.ustazone.mapper.admin.AdminComplainViewMapper;
 import uz.ustazone.repository.ComplaintAttachRepository;
 import uz.ustazone.repository.ComplaintRepository;
-import uz.ustazone.service.AttachService;
+import uz.ustazone.service.general.AttachService;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
