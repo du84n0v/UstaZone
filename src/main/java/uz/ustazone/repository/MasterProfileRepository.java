@@ -8,6 +8,8 @@ import org.springframework.data.repository.query.Param;
 import uz.ustazone.entity.MasterProfileEntity;
 import uz.ustazone.enums.ProfileRoleEnum;
 
+import java.util.Optional;
+
 public interface MasterProfileRepository extends CrudRepository<MasterProfileEntity, String> {
 
     @Query("SELECT mp FROM MasterProfileEntity mp " +
@@ -23,4 +25,5 @@ public interface MasterProfileRepository extends CrudRepository<MasterProfileEnt
             Pageable pageable
     );
 
+    Optional<MasterProfileEntity> findByProfileId(String profileId);
 }

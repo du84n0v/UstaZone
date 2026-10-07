@@ -1,7 +1,9 @@
 package uz.ustazone.repository;
 
+import jakarta.persistence.LockModeType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -12,6 +14,7 @@ import uz.ustazone.mapper.OrderStatisticsMapper;
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 public interface OrderRepository extends CrudRepository<OrderEntity, String> {
 
@@ -117,4 +120,8 @@ public interface OrderRepository extends CrudRepository<OrderEntity, String> {
             @Param("excludedIds") Collection<String> excludedIds,
             Pageable pageable
     );
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT o FROM OrderEntity o WHERE o.id = :id")
+    Optional<OrderEntity> findByIdForUpdate(@Param("id") String id);
 }

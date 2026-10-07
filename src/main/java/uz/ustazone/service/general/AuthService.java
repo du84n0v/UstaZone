@@ -199,7 +199,7 @@ public class AuthService {
                     current.setId(user.getId());
                     current.setFullName(user.getFullName());
                     current.setEmail(user.getEmail());
-                    current.setRole(user.getRole().name());
+                    current.setRole(user.getRole().name().replace("ROLE_", ""));
                     String avatarId = profileRepository.findAvatarAttachIdById(user.getId());
                     String avatarUrl = (avatarId != null ? attachService.openURL(avatarId) : null);
 

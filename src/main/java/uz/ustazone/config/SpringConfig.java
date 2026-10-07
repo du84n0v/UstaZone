@@ -3,6 +3,7 @@ package uz.ustazone.config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -30,48 +31,48 @@ public class SpringConfig {
 
     @Autowired
     private UserDetailsService userDetailsService;
-
     @Autowired
     private JwtAuthenticationFilter jwtTokenFilter;
 
-    public static final String[] AUTH_WHITELIST = {
-            "/api/v1/auth/**",
-            "/api/v1/client/master/{masterId}/public-profile",
-            "/api/v1/public/orders",
-            "/api/v1/master/public-profile/{masterId}",
-            "/api/v1/attach/**",
-            "/api/v1/orders",
-
-
-            "/v3/api-docs/**",
-            "/swagger-ui/**",
-            "/swagger-ui.html"
-    };
+    // AUTH_WHITELIST massivi olib tashlandi, o'rniga to'g'ridan-to'g'ri securityFilterChain da yozildi.
 
     @Bean
     public AuthenticationProvider authenticationProvider(PasswordEncoder passwordEncoder){
         final DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider(userDetailsService);
         authenticationProvider.setPasswordEncoder(passwordEncoder);
-
         return authenticationProvider;
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests(auth -> auth
-                .requestMatchers(AUTH_WHITELIST).permitAll()
+                // Barcha public so'rovlar
+                .requestMatchers("/api/v1/auth/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/v1/orders").permitAll() // Buyurtmalar ro'yxatini ko'rish ochiq
+                .requestMatchers(HttpMethod.GET, "/api/v1/public/orders").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/v1/master/public-profile/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/v1/client/master/*/public-profile").permitAll()
+
+                // Fayllarni faqat O'QISH uchun ochiq, yuklash va o'chirish yopiq
+                .requestMatchers(HttpMethod.GET, "/api/v1/attach/open/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/v1/attach/download/**").permitAll()
+
+                // Swagger UI uchun
+                .requestMatchers("/v3/api-docs/**").permitAll()
+                .requestMatchers("/swagger-ui/**").permitAll()
+                .requestMatchers("/swagger-ui.html").permitAll()
+
+                // Qolgan barcha so'rovlar avtorizatsiyadan o'tishni talab qiladi
                 .anyRequest().authenticated()
         ).addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class);
 
         http.csrf(AbstractHttpConfigurer::disable);
-
         http.cors(cors -> {
             CorsConfiguration configuration = new CorsConfiguration();
             configuration.setAllowedOriginPatterns(List.of("*"));
-            configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+            configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
             configuration.setAllowedHeaders(List.of("*"));
             configuration.setAllowCredentials(true);
-
             UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
             source.registerCorsConfiguration("/**", configuration);
             cors.configurationSource(source);
@@ -91,7 +92,7 @@ public class SpringConfig {
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) {
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
     }
 }

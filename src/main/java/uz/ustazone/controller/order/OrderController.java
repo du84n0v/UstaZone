@@ -43,4 +43,23 @@ public class OrderController {
         Page<OrderShortResponseDTO> orders = orderService.getPublicOrders(categoryIds, region, PageUtil.page(page), size);
         return ResponseEntity.ok(orders);
     }
+
+    @PreAuthorize("hasRole('MASTER')")
+    @PostMapping("/{id}/claim")
+    @io.swagger.v3.oas.annotations.Operation(summary = "Claim Order", description = "Ustalar tomonidan buyurtmani olish (qabul qilish)")
+    public org.springframework.http.ResponseEntity<String> claimOrder(@PathVariable String id) {
+        String masterId = SpringSecurityUtil.getCurrentProfileId();
+        return org.springframework.http.ResponseEntity.ok(orderService.claimOrder(masterId, id));
+    }
+
+    @PreAuthorize("hasAnyRole('MASTER', 'CLIENT', 'ADMIN')")
+    @PatchMapping("/{id}/advance")
+    @Operation(summary = "Advance Status", description = "Buyurtma holatini keyingi bosqichga o'tkazish (Masalan: ACCEPTED -> EN_ROUTE)")
+    public org.springframework.http.ResponseEntity<String> advanceOrderStatus(
+            @PathVariable String id,
+            @jakarta.validation.Valid @RequestBody uz.ustazone.dto.order.OrderAdvanceDTO dto) {
+
+        String profileId = SpringSecurityUtil.getCurrentProfileId();
+        return org.springframework.http.ResponseEntity.ok(orderService.advanceOrderStatus(profileId, id, dto.getStatus()));
+    }
 }
