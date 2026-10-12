@@ -5,9 +5,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
+import uz.ustazone.entity.MasterCategoryEntity;
 import uz.ustazone.entity.MasterProfileEntity;
 import uz.ustazone.enums.ProfileRoleEnum;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface MasterProfileRepository extends CrudRepository<MasterProfileEntity, String> {
@@ -26,4 +28,17 @@ public interface MasterProfileRepository extends CrudRepository<MasterProfileEnt
     );
 
     Optional<MasterProfileEntity> findByProfileId(String profileId);
+
+    // Ustani kategoriyalari bilan birga N+1 siz bitta so'rovda olib chiqish
+    @org.springframework.data.jpa.repository.Query("SELECT mp FROM MasterProfileEntity mp " +
+            "LEFT JOIN FETCH mp.masterCategories mc " +
+            "LEFT JOIN FETCH mc.category " +
+            "WHERE mp.id = :id")
+    java.util.Optional<uz.ustazone.entity.MasterProfileEntity> findByIdWithCategories(@Param("id") String id);
+
+    // Ustaga tegishli xizmatlarni (narxlari bilan) N+1 siz olish
+    @Query("SELECT mc FROM MasterCategoryEntity mc " +
+            "JOIN FETCH mc.category " +
+            "WHERE mc.masterProfile.id = :masterId")
+    List<MasterCategoryEntity> findAllByMasterIdWithCategory(@Param("masterId") String masterId);
 }

@@ -46,8 +46,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             JwtDTO jwtDTO = JwtUtil.decode(token);
             UserDetails userDetails = customUserDetailsService.loadUserByUsername(jwtDTO.getUsername());
 
+            // Bloklangan yoki nofaol foydalanuvchini tekshiramiz
+            if (!userDetails.isAccountNonLocked() || !userDetails.isEnabled()) {
+                response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                response.setContentType("application/json");
+                response.getWriter().write("{\"error\": \"Profilingiz bloklangan yoki faol emas!\"}");
+                return;
+            }
+
             UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
             authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+
+            SecurityContextHolder.getContext().setAuthentication(authentication);
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
 

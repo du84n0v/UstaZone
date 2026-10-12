@@ -57,6 +57,8 @@ public class SpringConfig {
                 .requestMatchers(HttpMethod.GET, "/api/v1/attach/open/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/attach/download/**").permitAll()
 
+                .requestMatchers(HttpMethod.GET, "/api/v1/categories/**").permitAll()
+
                 // Swagger UI uchun
                 .requestMatchers("/v3/api-docs/**").permitAll()
                 .requestMatchers("/swagger-ui/**").permitAll()

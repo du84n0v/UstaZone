@@ -24,6 +24,7 @@ import uz.ustazone.enums.VerificationStatusEnum;
 import uz.ustazone.exception.AppBadRequestException;
 import uz.ustazone.exception.ItemNotFoundException;
 import uz.ustazone.repository.ProfileRepository;
+import uz.ustazone.repository.SubscriptionRepository;
 import uz.ustazone.repository.VerificationAttemptRepository;
 import uz.ustazone.service.profile.master.MasterProfileService;
 import uz.ustazone.util.JwtUtil;
@@ -53,6 +54,8 @@ public class AuthService {
     private AuthenticationManager authenticationManager;
     @Autowired
     private MasterVerificationRepository masterVerificationRepository;
+    @Autowired
+    private SubscriptionRepository subscriptionRepository;
 
     public String registerMaster(MasterRegisterDTO dto) {
 
@@ -146,6 +149,24 @@ public class AuthService {
 
         profile.setStatus(GeneralStatusEnum.ACTIVE);
         profileRepository.save(profile);
+
+        // Agar tasdiqlangan foydalanuvchi USTA bo'lsa, unga avtomatik 30 kunlik PRO trial obuna beramiz (MVP uchun)
+        if (profile.getRole() == ProfileRoleEnum.ROLE_MASTER) {
+            subscriptionRepository.findByUserId(profile.getId()).ifPresentOrElse(
+                    sub -> {},
+                    () -> {
+                        uz.ustazone.entity.SubscriptionEntity trialSub = new uz.ustazone.entity.SubscriptionEntity();
+                        trialSub.setUserId(profile.getId());
+                        trialSub.setTier(uz.ustazone.enums.TariffTierEnum.PRO);
+                        trialSub.setAudience(uz.ustazone.enums.TariffAudienceEnum.MASTER);
+                        trialSub.setBillingPeriod(uz.ustazone.enums.BillingPeriodEnum.MONTHLY);
+                        trialSub.setIsTrial(true);
+                        trialSub.setTrialEndsDate(java.time.LocalDateTime.now().plusDays(30));
+                        trialSub.setExpiresDate(java.time.LocalDateTime.now().plusDays(30));
+                        subscriptionRepository.save(trialSub);
+                    }
+            );
+        }
 
         return "Successfully activated. You can login by now";
     }

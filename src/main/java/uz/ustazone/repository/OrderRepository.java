@@ -124,4 +124,20 @@ public interface OrderRepository extends CrudRepository<OrderEntity, String> {
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT o FROM OrderEntity o WHERE o.id = :id")
     Optional<OrderEntity> findByIdForUpdate(@Param("id") String id);
+
+    @org.springframework.data.jpa.repository.Query("SELECT o FROM OrderEntity o " +
+            "LEFT JOIN FETCH o.client " +
+            "LEFT JOIN FETCH o.master " +
+            "LEFT JOIN FETCH o.categories oc " +
+            "LEFT JOIN FETCH oc.category " +
+            "WHERE o.id = :id")
+    java.util.Optional<OrderEntity> findByIdWithDetails(@org.springframework.data.repository.query.Param("id") String id);
+
+    // Mijozning o'z buyurtmalari ro'yxati
+    @org.springframework.data.jpa.repository.Query("SELECT o FROM OrderEntity o WHERE o.clientId = :clientId ORDER BY o.createdDate DESC")
+    org.springframework.data.domain.Page<OrderEntity> findByClientId(@org.springframework.data.repository.query.Param("clientId") String clientId, org.springframework.data.domain.Pageable pageable);
+
+    // Ustaning o'zi qabul qilgan buyurtmalari ro'yxati
+    @org.springframework.data.jpa.repository.Query("SELECT o FROM OrderEntity o WHERE o.masterId = :masterId ORDER BY o.createdDate DESC")
+    org.springframework.data.domain.Page<OrderEntity> findByMasterId(@org.springframework.data.repository.query.Param("masterId") String masterId, org.springframework.data.domain.Pageable pageable);
 }

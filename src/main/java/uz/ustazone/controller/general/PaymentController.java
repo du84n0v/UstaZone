@@ -28,6 +28,10 @@ public class PaymentController {
         
         MasterProfileEntity master = masterProfileRepository.findByProfileId(masterId)
                 .orElseThrow(() -> new RuntimeException("Usta profili topilmadi"));
+
+        if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0 || amount.compareTo(new BigDecimal("10000000")) > 0) {
+            throw new uz.ustazone.exception.AppBadRequestException("Summa 0 dan katta va 10 000 000 so'mdan oshmasligi kerak!");
+        }
                 
         // Balansga pul qo'shamiz
         master.setBalance((master.getBalance() != null ? master.getBalance() : BigDecimal.ZERO).add(amount));

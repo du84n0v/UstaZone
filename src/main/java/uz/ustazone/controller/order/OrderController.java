@@ -62,4 +62,30 @@ public class OrderController {
         String profileId = SpringSecurityUtil.getCurrentProfileId();
         return org.springframework.http.ResponseEntity.ok(orderService.advanceOrderStatus(profileId, id, dto.getStatus()));
     }
+
+    @org.springframework.web.bind.annotation.GetMapping("/{id}")
+    @io.swagger.v3.oas.annotations.Operation(summary = "Get Detail", description = "Buyurtmaning to'liq ma'lumotlarini (Detail) olish")
+    public org.springframework.http.ResponseEntity<uz.ustazone.dto.order.OrderDetailResponseDTO> getOrderById(@org.springframework.web.bind.annotation.PathVariable String id) {
+        return org.springframework.http.ResponseEntity.ok(orderService.getOrderDetail(id));
+    }
+
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('CLIENT')")
+    @org.springframework.web.bind.annotation.GetMapping("/client")
+    @io.swagger.v3.oas.annotations.Operation(summary = "Client Orders", description = "Mijozning o'z buyurtmalari ro'yxati")
+    public org.springframework.http.ResponseEntity<org.springframework.data.domain.Page<OrderShortResponseDTO>> getMyClientOrders(
+            @org.springframework.web.bind.annotation.RequestParam(defaultValue = "0") int page,
+            @org.springframework.web.bind.annotation.RequestParam(defaultValue = "10") int size) {
+        String clientId = SpringSecurityUtil.getCurrentProfileId();
+        return org.springframework.http.ResponseEntity.ok(orderService.getClientOrders(clientId, page, size));
+    }
+
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('MASTER')")
+    @org.springframework.web.bind.annotation.GetMapping("/master")
+    @io.swagger.v3.oas.annotations.Operation(summary = "Master Orders", description = "Ustaning o'zi qabul qilgan buyurtmalari ro'yxati")
+    public org.springframework.http.ResponseEntity<org.springframework.data.domain.Page<OrderShortResponseDTO>> getMyMasterOrders(
+            @org.springframework.web.bind.annotation.RequestParam(defaultValue = "0") int page,
+            @org.springframework.web.bind.annotation.RequestParam(defaultValue = "10") int size) {
+        String masterId = SpringSecurityUtil.getCurrentProfileId();
+        return org.springframework.http.ResponseEntity.ok(orderService.getMasterOrders(masterId, page, size));
+    }
 }

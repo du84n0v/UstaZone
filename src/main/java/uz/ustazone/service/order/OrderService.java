@@ -3,6 +3,7 @@ package uz.ustazone.service.order;
 import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uz.ustazone.dto.category.CategoryShortInfoDTO;
@@ -15,6 +16,7 @@ import uz.ustazone.enums.PromoCodeTypeEnum;
 import uz.ustazone.exception.AppBadRequestException;
 import uz.ustazone.exception.ItemNotFoundException;
 import uz.ustazone.repository.*;
+import uz.ustazone.util.SpringSecurityUtil;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -352,5 +354,99 @@ public class OrderService {
         commissionTx.setStatus(uz.ustazone.enums.TransactionStatusEnum.SUCCESS);
         commissionTx.setProvider(PaymentProviderEnum.INTERNAL);
         return commissionTx;
+    }
+
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
+    public uz.ustazone.dto.order.OrderDetailResponseDTO getOrderDetail(String orderId) {
+        uz.ustazone.entity.OrderEntity order = orderRepository.findByIdWithDetails(orderId)
+                .orElseThrow(() -> new ItemNotFoundException("Buyurtma topilmadi"));
+
+        // Hozirgi so'rov yuborayotgan foydalanuvchini aniqlaymiz (agar token bo'lsa)
+        String currentUserId = null;
+        boolean isAdmin = false;
+        try {
+            currentUserId = SpringSecurityUtil.getCurrentProfileId();
+            isAdmin = Objects.requireNonNull(SecurityContextHolder.getContext()
+                            .getAuthentication()).getAuthorities().stream()
+                    .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+        } catch (Exception ignored) {
+        }
+
+        // To'liq ma'lumotni ko'rish huquqi: Egasi (Client), Qabul qilgan usta (Master) yoki Admin
+        boolean canSeePrivateInfo = isAdmin || (currentUserId != null &&
+                (currentUserId.equals(order.getClientId()) || currentUserId.equals(order.getMasterId())));
+
+        uz.ustazone.dto.order.OrderDetailResponseDTO.OrderDetailResponseDTOBuilder builder = uz.ustazone.dto.order.OrderDetailResponseDTO.builder()
+                .id(order.getId())
+                .title(order.getTitle())
+                .description(order.getDescription())
+                .city(order.getCity())
+                // Aniq manzil faqat huquqi borlarga ko'rinadi, begonalarga faqat shahar ko'rinadi
+                .address(canSeePrivateInfo ? order.getAddress() : order.getCity())
+                .status(order.getStatus().name())
+                .paymentMethod(order.getPaymentMethod() != null ? order.getPaymentMethod().name() : null)
+                .amount(order.getAmount())
+                .discount(order.getDiscount())
+                .commissionAmount(order.getCommissionAmount())
+                .masterAmount(order.getMasterAmount())
+                .isEmergency(order.getIsEmergency())
+                .isDispute(order.getIsDispute())
+                .clientLat(canSeePrivateInfo ? order.getClientLat() : null)
+                .clientLng(canSeePrivateInfo ? order.getClientLng() : null)
+                .masterLat(order.getMasterLat())
+                .masterLng(order.getMasterLng())
+                .createdDate(order.getCreatedDate())
+                .acceptedDate(order.getAcceptedDate())
+                .startedDate(order.getStartedDate())
+                .completedDate(order.getCompletedDate())
+                .cancelledDate(order.getCancelledDate());
+
+        if (order.getClient() != null) {
+            builder.clientFullName(order.getClient().getFullName());
+            // Telefon faqat huquqi borlarga ko'rinadi!
+            builder.clientPhone(canSeePrivateInfo ? order.getClient().getPhone() : null);
+        }
+
+        if (order.getMaster() != null) {
+            builder.masterFullName(order.getMaster().getFullName());
+            builder.masterPhone(order.getMaster().getPhone());
+        }
+
+        if (order.getCategories() != null) {
+            builder.categories(order.getCategories().stream()
+                    .map(oc -> new uz.ustazone.dto.category.CategoryShortInfoDTO(
+                            oc.getCategoryId(),
+                            oc.getCategory() != null ? oc.getCategory().getNameUz() : null))
+                    .toList());
+        }
+
+        return builder.build();
+    }
+
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
+    public org.springframework.data.domain.Page<OrderShortResponseDTO> getClientOrders(String clientId, int page, int size) {
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(page, size);
+        org.springframework.data.domain.Page<OrderEntity> orderPage = orderRepository.findByClientId(clientId, pageable);
+        return orderPage.map(this::toShortDTO);
+    }
+
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
+    public org.springframework.data.domain.Page<OrderShortResponseDTO> getMasterOrders(String masterId, int page, int size) {
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(page, size);
+        org.springframework.data.domain.Page<OrderEntity> orderPage = orderRepository.findByMasterId(masterId, pageable);
+        return orderPage.map(this::toShortDTO);
+    }
+
+    private OrderShortResponseDTO toShortDTO(OrderEntity order) {
+        return OrderShortResponseDTO.builder()
+                .id(order.getId())
+                .title(order.getTitle())
+                .amount(order.getAmount())
+                .status(order.getStatus().name())
+                .createdDate(order.getCreatedDate())
+                .region(order.getCity())
+                .address(order.getAddress())
+                .isEmergency(order.getIsEmergency())
+                .build();
     }
 }

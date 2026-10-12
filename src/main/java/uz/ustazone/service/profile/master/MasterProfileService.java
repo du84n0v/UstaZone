@@ -73,7 +73,7 @@ public class MasterProfileService {
 
     public MasterCabinetResponseDTO getMasterCabinetInfo(String masterId) {
         // 1. Ustaning o'zini bazadan topamiz
-        MasterProfileEntity masterProfile = masterProfileRepository.findById(masterId)
+        MasterProfileEntity masterProfile = masterProfileRepository.findByIdWithCategories(masterId)
                 .orElseThrow(() -> new ItemNotFoundException("Usta topilmadi"));
 
         Optional<ProfileEntity> optional = profileRepository.findById(masterId);
