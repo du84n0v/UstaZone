@@ -50,6 +50,7 @@ public class SpringConfig {
                 .requestMatchers("/api/v1/auth/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/orders").permitAll() // Buyurtmalar ro'yxatini ko'rish ochiq
                 .requestMatchers(HttpMethod.GET, "/api/v1/public/orders").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/v1/public/masters/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/master/public-profile/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/client/master/*/public-profile").permitAll()
 

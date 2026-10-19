@@ -3,6 +3,7 @@ package uz.ustazone.controller.general;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -22,6 +23,7 @@ public class PaymentController {
 
     @PreAuthorize("hasRole('MASTER')")
     @PostMapping("/fill-balance-test")
+    @Profile({"dev", "test", "local"})
     @Operation(summary = "Fill Balance (Test)", description = "Ustalar o'z balansini to'ldirib ko'rishi uchun test API (Payme/Click integratsiyasigacha)")
     public ResponseEntity<String> fillBalance(@RequestParam BigDecimal amount) {
         String masterId = SpringSecurityUtil.getCurrentProfileId();

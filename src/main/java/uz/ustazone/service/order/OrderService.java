@@ -10,9 +10,7 @@ import uz.ustazone.dto.category.CategoryShortInfoDTO;
 import uz.ustazone.dto.order.OrderCreateDTO;
 import uz.ustazone.dto.order.OrderShortResponseDTO;
 import uz.ustazone.entity.*;
-import uz.ustazone.enums.OrderStatusEnum;
-import uz.ustazone.enums.PaymentProviderEnum;
-import uz.ustazone.enums.PromoCodeTypeEnum;
+import uz.ustazone.enums.*;
 import uz.ustazone.exception.AppBadRequestException;
 import uz.ustazone.exception.ItemNotFoundException;
 import uz.ustazone.repository.*;
@@ -20,6 +18,7 @@ import uz.ustazone.util.SpringSecurityUtil;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -42,7 +41,6 @@ public class OrderService {
     private SubscriptionRepository subscriptionRepository;
     @Autowired
     private TransactionRepository transactionRepository;
-
     @Autowired
     private MasterProfileRepository masterProfileRepository;
 
@@ -203,7 +201,7 @@ public class OrderService {
                         .status(order.getStatus().name())
                         .createdDate(order.getCreatedDate())
                         .region(order.getCity())
-                        .address(order.getAddress())
+                        .address(order.getCity())
                         .isEmergency(order.getIsEmergency())
                         .categories(order.getCategories() != null
                                 ? order.getCategories().stream()
@@ -226,31 +224,32 @@ public class OrderService {
         SubscriptionEntity subscription = subscriptionRepository.findByUserId(masterId)
                 .orElseThrow(() -> new AppBadRequestException("Sizda faol obuna (tarif) yo'q. Iltimos, obuna sotib oling!"));
         // Agar usta FREE (Bepul) tarifda bo'lsa
-        if (subscription.getTier() == uz.ustazone.enums.TariffTierEnum.FREE) {
+        if (subscription.getTier() == TariffTierEnum.FREE) {
             throw new AppBadRequestException("Bepul (FREE) tarifdagi ustalar buyurtma qabul qila olmaydi. Iltimos, tarifingizni yangilang!");
         }
         // Agar obuna muddati tugagan bo'lsa
-        if (subscription.getExpiresDate() != null && subscription.getExpiresDate().isBefore(java.time.LocalDateTime.now())) {
+        if (subscription.getExpiresDate() != null && subscription.getExpiresDate().isBefore(LocalDateTime.now())) {
             throw new AppBadRequestException("Obunangiz muddati tugagan. Iltimos, uzaytiring!");
         }
         // 2. Buyurtmani bloklash (Row-level lock) - ikkinchi usta bu qatorda kutib turadi
         OrderEntity order = orderRepository.findByIdForUpdate(orderId)
                 .orElseThrow(() -> new ItemNotFoundException("Buyurtma topilmadi"));
         // Holat tekshiruvi: Buyurtma kimdir tomondan olinib bo'linganmi yoki bekor qilinganmi?
-        if (order.getStatus() != uz.ustazone.enums.OrderStatusEnum.PENDING) {
+        if (order.getStatus() != OrderStatusEnum.PENDING) {
             throw new AppBadRequestException("Kechirasiz, bu buyurtma allaqachon boshqa usta tomonidan olingan yoki bekor qilingan.");
         }
         // 3. Buyurtmani ustaga biriktirish
         order.setMasterId(masterId);
-        order.setStatus(uz.ustazone.enums.OrderStatusEnum.ACCEPTED);
-        order.setAcceptedDate(java.time.LocalDateTime.now());
+        order.setStatus(OrderStatusEnum.ACCEPTED);
+        order.setAcceptedDate(LocalDateTime.now());
         orderRepository.save(order);
         return "Buyurtma muvaffaqiyatli qabul qilindi!";
     }
 
     @Transactional
-    public String advanceOrderStatus(String profileId, String orderId, uz.ustazone.enums.OrderStatusEnum newStatus) {
-        OrderEntity order = orderRepository.findById(orderId)
+    public String advanceOrderStatus(String profileId, String orderId, OrderStatusEnum newStatus) {
+        // 4-band: Qator darajasida qulf (Pessimistic Lock)
+        OrderEntity order = orderRepository.findByIdForUpdate(orderId)
                 .orElseThrow(() -> new ItemNotFoundException("Buyurtma topilmadi"));
 
         ProfileEntity profile = profileRepository.findById(profileId)
@@ -265,49 +264,61 @@ public class OrderService {
             throw new AppBadRequestException("Siz bu buyurtmani o'zgartirish huquqiga ega emassiz!");
         }
 
-        uz.ustazone.enums.OrderStatusEnum current = order.getStatus();
+        OrderStatusEnum current = order.getStatus();
 
         // 1. MIJOZ (CLIENT) HUQUQLARI
         if (isClient) {
-            if (newStatus == uz.ustazone.enums.OrderStatusEnum.CANCELLED && current == uz.ustazone.enums.OrderStatusEnum.PENDING) {
+            if (newStatus == OrderStatusEnum.CANCELLED && current == OrderStatusEnum.PENDING) {
                 order.setStatus(newStatus);
-                order.setCancelledDate(java.time.LocalDateTime.now());
-            } else if (newStatus == uz.ustazone.enums.OrderStatusEnum.CONFIRMED && current == uz.ustazone.enums.OrderStatusEnum.COMPLETED) {
-                order.setStatus(newStatus);
-                order.setClientConfirmed(true);
-                uz.ustazone.enums.PaymentProviderEnum provider;
-                if (order.getPaymentMethod().name().equals("BONUS")) {
-                    provider = PaymentProviderEnum.INTERNAL;
-                } else {
-                    provider = uz.ustazone.enums.PaymentProviderEnum.valueOf(order.getPaymentMethod().name());
+                order.setCancelledDate(LocalDateTime.now());
+            } else if (newStatus == OrderStatusEnum.CONFIRMED && current == OrderStatusEnum.COMPLETED) {
+                // 6-band: Idempotentlik — agar allaqachon tasdiqlangan/to'langan bo'lsa qayta komissiya yechmaymiz
+                if (Boolean.TRUE.equals(order.getClientConfirmed()) || current == OrderStatusEnum.PAID) {
+                    return "Buyurtma allaqachon tasdiqlangan va to'langan!";
                 }
+
+                // Naqd to'lovda yakuniy status: PAID
+                order.setStatus(OrderStatusEnum.PAID);
+                order.setClientConfirmed(true);
+                order.setCompletedDate(LocalDateTime.now());
+
+                PaymentProviderEnum provider = PaymentProviderEnum.INTERNAL;
+                if (order.getPaymentMethod() != null) {
+                    try {
+                        provider = PaymentProviderEnum.valueOf(order.getPaymentMethod().name());
+                    } catch (Exception ignored) {
+                        provider = PaymentProviderEnum.INTERNAL;
+                    }
+                }
+
                 // 3. Tranzaksiya 1: Mijoz to'lovi (PAYMENT)
                 uz.ustazone.entity.TransactionEntity paymentTx = new uz.ustazone.entity.TransactionEntity();
                 paymentTx.setUserId(order.getClientId());
                 paymentTx.setOrderId(order.getId());
-                paymentTx.setType(uz.ustazone.enums.TransactionTypeEnum.PAYMENT);
+                paymentTx.setType(TransactionTypeEnum.PAYMENT);
                 paymentTx.setAmount(order.getAmount());
-                paymentTx.setStatus(uz.ustazone.enums.TransactionStatusEnum.SUCCESS);
+                paymentTx.setStatus(TransactionStatusEnum.SUCCESS);
                 paymentTx.setProvider(provider);
                 transactionRepository.save(paymentTx);
+
                 // 4. Tranzaksiya 2: Tizim komissiyasi (COMMISSION)
                 TransactionEntity commissionTx = getTransactionEntity(order);
                 transactionRepository.save(commissionTx);
-                // 5. Usta balansidan komissiyani ushlab qolish (Yechib olish)
-                uz.ustazone.entity.MasterProfileEntity masterProfile = masterProfileRepository.findByProfileId(order.getMasterId())
-                        .orElseThrow(() -> new ItemNotFoundException("Usta topilmadi"));
 
-                // Ustaning joriy balansidan komissiyani ayiramiz
-                masterProfile.setBalance(masterProfile.getBalance().subtract(order.getCommissionAmount()));
+                // 5. Usta balansidan komissiyani ushlab qolish
+                if (order.getMasterId() != null) {
+                    uz.ustazone.entity.MasterProfileEntity masterProfile = masterProfileRepository.findByProfileId(order.getMasterId())
+                            .orElseThrow(() -> new ItemNotFoundException("Usta topilmadi"));
 
-                // Agar to'lov CLICK/PAYME bilan qilingan bo'lsa (Mijoz naqd pul bermasa)
-                // U holda ustaning withdrawable_balance (Yechib olish mumkin bo'lgan balansi) ga MasterAmount ni qo'shamiz
-                if (provider == uz.ustazone.enums.PaymentProviderEnum.CLICK || provider == uz.ustazone.enums.PaymentProviderEnum.PAYME) {
-                    masterProfile.setWithdrawableBalance(masterProfile.getWithdrawableBalance().add(order.getMasterAmount()));
+                    masterProfile.setBalance(masterProfile.getBalance().subtract(order.getCommissionAmount()));
+
+                    if (provider == PaymentProviderEnum.CLICK || provider == PaymentProviderEnum.PAYME) {
+                        masterProfile.setWithdrawableBalance(masterProfile.getWithdrawableBalance().add(order.getMasterAmount()));
+                    }
+
+                    masterProfileRepository.save(masterProfile);
                 }
-
-                masterProfileRepository.save(masterProfile);
-            } else if (newStatus == uz.ustazone.enums.OrderStatusEnum.DISPUTED) {
+            } else if (newStatus == OrderStatusEnum.DISPUTED) {
                 order.setStatus(newStatus);
                 order.setIsDispute(true);
             } else {
@@ -316,47 +327,44 @@ public class OrderService {
         }
         // 2. USTA (MASTER) HUQUQLARI
         else if (isMaster) {
-            if (newStatus == uz.ustazone.enums.OrderStatusEnum.EN_ROUTE && current == uz.ustazone.enums.OrderStatusEnum.ACCEPTED) {
+            if (newStatus == OrderStatusEnum.EN_ROUTE && current == OrderStatusEnum.ACCEPTED) {
                 order.setStatus(newStatus);
-                order.setEnrouteDate(java.time.LocalDateTime.now());
-            } else if (newStatus == uz.ustazone.enums.OrderStatusEnum.IN_PROGRESS && current == uz.ustazone.enums.OrderStatusEnum.EN_ROUTE) {
+                order.setEnrouteDate(LocalDateTime.now());
+            } else if (newStatus == OrderStatusEnum.IN_PROGRESS && current == OrderStatusEnum.EN_ROUTE) {
                 order.setStatus(newStatus);
-                order.setStartedDate(java.time.LocalDateTime.now());
-            } else if (newStatus == uz.ustazone.enums.OrderStatusEnum.COMPLETED && current == uz.ustazone.enums.OrderStatusEnum.IN_PROGRESS) {
+                order.setStartedDate(LocalDateTime.now());
+            } else if (newStatus == OrderStatusEnum.COMPLETED && current == OrderStatusEnum.IN_PROGRESS) {
                 order.setStatus(newStatus);
-                order.setCompletedDate(java.time.LocalDateTime.now());
+                order.setCompletedDate(LocalDateTime.now());
                 order.setMasterConfirmed(true);
-            } else if (newStatus == uz.ustazone.enums.OrderStatusEnum.DISPUTED) {
+            } else if (newStatus == OrderStatusEnum.DISPUTED) {
                 order.setStatus(newStatus);
                 order.setIsDispute(true);
             } else {
                 throw new AppBadRequestException("Usta sifatida '" + current.name() + "' holatidan '" + newStatus.name() + "' ga o'ta olmaysiz!");
             }
         }
-        // 3. ADMIN istalgan holatga o'zgartira oladi (Majburiy aralashuv uchun)
+        // 3. ADMIN istalgan holatga o'zgartira oladi
         else {
             order.setStatus(newStatus);
         }
 
         orderRepository.save(order);
-
-        // TODO: WebSocket orqali Real-Time xabar yuborish (Keyingi qadamda quramiz)
-
-        return "Buyurtma holati " + newStatus.name() + " ga o'zgartirildi!";
+        return "Buyurtma holati muvaffaqiyatli o'zgartirildi: " + newStatus.name();
     }
 
     private static @NonNull TransactionEntity getTransactionEntity(OrderEntity order) {
         TransactionEntity commissionTx = new TransactionEntity();
         commissionTx.setUserId(order.getMasterId());
         commissionTx.setOrderId(order.getId());
-        commissionTx.setType(uz.ustazone.enums.TransactionTypeEnum.COMMISSION);
+        commissionTx.setType(TransactionTypeEnum.COMMISSION);
         commissionTx.setAmount(order.getCommissionAmount()); // Bu summani createOrder metodida oldindan hisoblab qo'yganmiz
-        commissionTx.setStatus(uz.ustazone.enums.TransactionStatusEnum.SUCCESS);
+        commissionTx.setStatus(TransactionStatusEnum.SUCCESS);
         commissionTx.setProvider(PaymentProviderEnum.INTERNAL);
         return commissionTx;
     }
 
-    @org.springframework.transaction.annotation.Transactional(readOnly = true)
+    @Transactional(readOnly = true)
     public uz.ustazone.dto.order.OrderDetailResponseDTO getOrderDetail(String orderId) {
         uz.ustazone.entity.OrderEntity order = orderRepository.findByIdWithDetails(orderId)
                 .orElseThrow(() -> new ItemNotFoundException("Buyurtma topilmadi"));
@@ -423,20 +431,23 @@ public class OrderService {
         return builder.build();
     }
 
-    @org.springframework.transaction.annotation.Transactional(readOnly = true)
-    public org.springframework.data.domain.Page<OrderShortResponseDTO> getClientOrders(String clientId, int page, int size) {
-        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(page, size);
-        org.springframework.data.domain.Page<OrderEntity> orderPage = orderRepository.findByClientId(clientId, pageable);
+    @Transactional(readOnly = true)
+    public Page<OrderShortResponseDTO> getClientOrders(String clientId, int page, int size) {
+        // createdDate bo'yicha kamayish tartibida saralash
+        Pageable pageable = PageRequest.of(
+                page, size, Sort.by(Sort.Direction.DESC, "createdDate"));
+        Page<OrderEntity> orderPage = orderRepository.findByClientId(clientId, pageable);
         return orderPage.map(this::toShortDTO);
     }
 
-    @org.springframework.transaction.annotation.Transactional(readOnly = true)
-    public org.springframework.data.domain.Page<OrderShortResponseDTO> getMasterOrders(String masterId, int page, int size) {
-        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(page, size);
-        org.springframework.data.domain.Page<OrderEntity> orderPage = orderRepository.findByMasterId(masterId, pageable);
+    @Transactional(readOnly = true)
+    public Page<OrderShortResponseDTO> getMasterOrders(String masterId, int page, int size) {
+        // createdDate bo'yicha kamayish tartibida saralash
+        Pageable pageable = PageRequest.of(
+                page, size, Sort.by(Sort.Direction.DESC, "createdDate"));
+        Page<OrderEntity> orderPage = orderRepository.findByMasterId(masterId, pageable);
         return orderPage.map(this::toShortDTO);
     }
-
     private OrderShortResponseDTO toShortDTO(OrderEntity order) {
         return OrderShortResponseDTO.builder()
                 .id(order.getId())
@@ -445,8 +456,9 @@ public class OrderService {
                 .status(order.getStatus().name())
                 .createdDate(order.getCreatedDate())
                 .region(order.getCity())
-                .address(order.getAddress())
+                .address(order.getAddress()) // Bu client va master o'z buyurtmalarini ko'rishi uchun to'g'ri qoladi
                 .isEmergency(order.getIsEmergency())
                 .build();
     }
 }
+
