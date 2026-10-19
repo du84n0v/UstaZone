@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import uz.ustazone.service.general.AttachService;
@@ -18,6 +19,7 @@ public class AttachController {
     @Autowired
     private AttachService attachService;
 
+    @PreAuthorize("isAuthenticated()")
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "Upload", description = "API used for uploading files")
     public ResponseEntity<String> create(@RequestParam("file") MultipartFile file) {
@@ -35,8 +37,9 @@ public class AttachController {
         return attachService.download(fileId);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{fileId}")
-    @Operation(summary = "Delete", description = "API used for deleting files")
+    @Operation(summary = "Delete", description = "API used for deleting files (Only Admin)")
     public ResponseEntity<Boolean> delete(@PathVariable String fileId) {
         return ResponseEntity.ok(attachService.delete(fileId));
     }
