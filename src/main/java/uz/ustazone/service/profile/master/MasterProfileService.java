@@ -207,7 +207,7 @@ public class MasterProfileService {
         profileRepository.getById(masterId)
                 .orElseThrow(() -> new ItemNotFoundException("Profile not found"));
 
-        masterCategoryService.updateCategoryPrice(dtoList);
+        masterCategoryService.updateCategoryPrice(masterId, dtoList);
 
         return "Successfully changed";
     }

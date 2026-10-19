@@ -41,18 +41,24 @@ public class MasterCategoryService {
     }
 
     @Transactional
-    public void updateCategoryPrice(List<MasterServicePriceUpdateDTO> dtoList) {
+    public void updateCategoryPrice(String masterId, List<MasterServicePriceUpdateDTO> dtoList) {
         for (MasterServicePriceUpdateDTO dto : dtoList) {
-            int effRow;
-            if(dto.getPriceType().equals(PriceTypeEnum.FROM)) {
-                effRow = masterCategoryRepository.updateCategoryPrice(dto.getId(), dto.getPriceType(), dto.getMinPrice(), dto.getMaxPrice());
+            MasterCategoryEntity entity = masterCategoryRepository.findById(dto.getId())
+                    .orElseThrow(() -> new AppBadRequestException("Xizmat narxi topilmadi"));
+
+            // Begona usta narxini o'zgartira olmasligi uchun tekshiruv (Egalik huquqi)
+            if (!entity.getMasterProfileId().equals(masterId)) {
+                throw new AppBadRequestException("Siz faqat o'zingizning xizmatlaringiz narxini o'zgartira olasiz!");
             }
-            else {
-                effRow = masterCategoryRepository.updateCategoryPrice(dto.getId(), dto.getPriceType(), dto.getMinPrice(), null);
+
+            entity.setPriceType(dto.getPriceType());
+            entity.setMinPrice(dto.getMinPrice());
+            if (dto.getPriceType().equals(PriceTypeEnum.FROM)) {
+                entity.setMaxPrice(dto.getMaxPrice());
+            } else {
+                entity.setMaxPrice(null);
             }
-            if(effRow == 0){
-                throw new AppBadRequestException("Something went wrong");
-            }
+            masterCategoryRepository.save(entity);
         }
     }
 }

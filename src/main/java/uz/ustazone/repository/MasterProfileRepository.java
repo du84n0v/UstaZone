@@ -30,7 +30,7 @@ public interface MasterProfileRepository extends CrudRepository<MasterProfileEnt
     Optional<MasterProfileEntity> findByProfileId(String profileId);
 
     // Ustani kategoriyalari bilan birga N+1 siz bitta so'rovda olib chiqish
-    @org.springframework.data.jpa.repository.Query("SELECT mp FROM MasterProfileEntity mp " +
+    @Query("SELECT mp FROM MasterProfileEntity mp " +
             "LEFT JOIN FETCH mp.masterCategories mc " +
             "LEFT JOIN FETCH mc.category " +
             "WHERE mp.id = :id")
@@ -41,4 +41,15 @@ public interface MasterProfileRepository extends CrudRepository<MasterProfileEnt
             "JOIN FETCH mc.category " +
             "WHERE mc.masterProfile.id = :masterId")
     List<MasterCategoryEntity> findAllByMasterIdWithCategory(@Param("masterId") String masterId);
+
+    @Query("SELECT DISTINCT mp FROM MasterProfileEntity mp " +
+            "JOIN mp.profile p " +
+            "LEFT JOIN mp.masterCategories mc " +
+            "WHERE p.status = 'ACTIVE' AND p.visible = true AND (p.isBlocked IS NULL OR p.isBlocked = false) " +
+            "AND (:city IS NULL OR LOWER(p.city) LIKE LOWER(CONCAT('%', :city, '%'))) " +
+            "AND (:categoryId IS NULL OR mc.categoryId = :categoryId)")
+    Page<MasterProfileEntity> findPublicMasters(
+            @Param("city") String city,
+            @Param("categoryId") String categoryId,
+            Pageable pageable);
 }
