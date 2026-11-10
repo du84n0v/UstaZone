@@ -22,7 +22,7 @@ INSERT INTO profile (
              'System Admin',
              'umareshqurbonov52@gmail.com',
              '+998998887766',
-             '$2a$10$R/Igkn93XZq06dLPQ0S69.1V2zrWXUSCzYT38OpFZA1hx7EbyopkW',
+             '$2a$10$wQqtHY4AZfmdeKwYv8mu..R0Nk5KGl9EScdW2m9E08juYvPJjmmvS',
              'ROLE_ADMIN', -- yoki ADMIN (ProfileRoleEnum ga qarab)
              'Tashkent',
              'Yashnabod',
